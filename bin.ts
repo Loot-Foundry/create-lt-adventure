@@ -9,10 +9,19 @@ p.intro(`Creating new Foundry VTT module...`);
 const data = await p.group(
 	{
 		title: () =>
-			p.text({ message: "Module Title?", placeholder: "My New Module" }),
+			p.text({
+				message: "Module Title?",
+				placeholder: "My New Module",
+				defaultValue: "My New Module",
+			}),
 		id: ({ results }: any) =>
 			p.text({
 				message: "Module ID?",
+				initialValue:
+					results.title
+						?.toLowerCase()
+						.replace(/\s+/g, "-")
+						.replace(/[^a-z0-9-]/g, "") ?? "my-module",
 				placeholder:
 					results.title
 						?.toLowerCase()
@@ -42,34 +51,44 @@ const data = await p.group(
 		packs: () =>
 			p.multiselect({
 				message: "What Packs?",
+				required: false,
 				options: packs.map((pack) => ({
 					label: pack.label,
 					value: pack,
 				})),
 			}),
-		containPacks: () =>
-			p.confirm({
-				message: "Put Packs in a Folder?",
-			}),
+		containPacks: ({ results }: any) =>
+			results.packs?.length > 0
+				? p.confirm({
+						message: "Put Packs in a Folder?",
+						initialValue: true,
+					})
+				: Promise.resolve(false),
 		containPacksFolder: ({ results }: any) =>
 			results.containPacks
-				? p.text({ message: "Folder Name?", placeholder: results.title })
+				? p.text({
+						message: "Folder Name?",
+						placeholder: results.title,
+						defaultValue: results.title,
+					})
 				: Promise.resolve(),
 	},
 	{ onCancel: () => process.exit(0) },
 );
 
+console.log(data);
+
 await p.tasks([
 	{
 		title: "Making directory",
-		task: async (message) => {
+		task: async () => {
 			await mkdir(data.id, { recursive: true });
 			return "Directory created";
 		},
 	},
 	{
 		title: "Copying template",
-		task: async (message) => {
+		task: async () => {
 			await cp(new URL("templates/default", import.meta.url), data.id, {
 				recursive: true,
 			});
