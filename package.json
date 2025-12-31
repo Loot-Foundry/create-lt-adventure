@@ -44,7 +44,7 @@
 		"build:watch": "tsc --watch",
 		"prepublishOnly": "npm run build",
 		"prepack": "npm run build",
-		"dev": "bun src/bin.ts"
+		"dev": "bun src/bin.ts \"My New Module\" --auto-id"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",

@@ -8,33 +8,35 @@ import { existsSync, rmSync } from "fs";
 p.intro(`Creating a new Foundry VTT module...`);
 
 let deleteFolder = false;
+const cliArgs = process.argv.slice(2);
+const cliTitle = cliArgs[0];
+const autoId = cliArgs.includes("--auto-id");
+
 const data = await p.group(
 	{
 		title: () =>
-			p.text({
-				message: "Module Title?",
-				placeholder: "My New Module",
-				defaultValue: "My New Module",
-			}),
-		id: ({ results }: any) =>
-			p.text({
-				message: "Module ID?",
-				initialValue:
-					results.title
-						?.toLowerCase()
-						.replace(/\s+/g, "-")
-						.replace(/[^a-z0-9-]/g, "") ?? "my-module",
-				defaultValue:
-					results.title
-						?.toLowerCase()
-						.replace(/\s+/g, "-")
-						.replace(/[^a-z0-9-]/g, "") ?? "my-module",
-				placeholder:
-					results.title
-						?.toLowerCase()
-						.replace(/\s+/g, "-")
-						.replace(/[^a-z0-9-]/g, "") ?? "my-module",
-			}),
+			cliTitle
+				? Promise.resolve(cliTitle)
+				: p.text({
+						message: "Module Title?",
+						placeholder: "My New Module",
+						defaultValue: "My New Module",
+					}),
+		id: ({ results }: any) => {
+			const defaultId =
+				results.title
+					?.toLowerCase()
+					.replace(/\s+/g, "-")
+					.replace(/[^a-z0-9-]/g, "") ?? "my-module";
+			return autoId
+				? Promise.resolve(defaultId)
+				: p.text({
+						message: "Module ID?",
+						initialValue: defaultId,
+						defaultValue: defaultId,
+						placeholder: defaultId,
+					});
+		},
 		exists: async ({ results }: any) => {
 			const exists = existsSync(`./${results.id}`);
 			if (exists) {
@@ -146,7 +148,9 @@ await p.tasks([
 			);
 			mod.esmodules = [`dist/${data.id}.js`];
 			mod.styles = [`dist/${data.id}.css`];
-			mod.packs = data.packs;
+			mod.packs = data.packs.flatMap((pack) =>
+				data.system.map((system) => ({ ...pack, system })),
+			);
 			if (data.containPacks) {
 				mod.packFolders = [
 					{
