@@ -122,7 +122,7 @@ await p.tasks([
 	{
 		title: "Copying template",
 		task: async () => {
-			await cp(new URL("templates/default", import.meta.url), data.id, {
+			await cp(new URL("../templates/default", import.meta.url), data.id, {
 				recursive: true,
 			});
 			return "Template copied";
