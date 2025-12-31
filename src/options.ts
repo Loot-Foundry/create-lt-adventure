@@ -1,9 +1,9 @@
 const packs = [
 	{
-		label: "Adventure",
+		label: "Adventures",
 		name: "adventure",
 		path: "packs/adventure",
-		system: "dnd5e",
+		system: "",
 		type: "Adventure",
 		ownership: {
 			PLAYER: "OBSERVER",
@@ -11,10 +11,10 @@ const packs = [
 		},
 	},
 	{
-		label: "Player Options",
+		label: "Items",
 		name: "items",
 		path: "packs/items",
-		system: "dnd5e",
+		system: "",
 		type: "Item",
 		ownership: {
 			PLAYER: "OBSERVER",
@@ -25,7 +25,7 @@ const packs = [
 		label: "Journals",
 		name: "journals",
 		path: "packs/journals",
-		system: "dnd5e",
+		system: "",
 		type: "JournalEntry",
 		ownership: {
 			PLAYER: "OBSERVER",
@@ -33,10 +33,10 @@ const packs = [
 		},
 	},
 	{
-		label: "Bestiary",
+		label: "Actors",
 		name: "actors",
 		path: "packs/actors",
-		system: "dnd5e",
+		system: "",
 		type: "Actor",
 		ownership: {
 			PLAYER: "OBSERVER",
