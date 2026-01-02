@@ -3,7 +3,7 @@ import * as p from "@clack/prompts";
 import { cyan } from "kolorist";
 import { mkdir, cp } from "fs/promises";
 import { packs, systems } from "./options";
-import { existsSync, rmSync } from "fs";
+import { existsSync, readdirSync, rmSync } from "fs";
 
 p.intro(`Creating a new Foundry VTT module...`);
 
@@ -11,9 +11,48 @@ let deleteFolder = false;
 const cliArgs = process.argv.slice(2);
 const cliTitle = cliArgs[0];
 const autoId = cliArgs.includes("--auto-id");
+// Grab available templates from dir
+const templates = readdirSync("./templates");
+// Grab addons from addons/dirs
+const addonDirs = readdirSync("./addons").filter((item) => {
+	const stat = require("fs").statSync(`./addons/${item}`);
+	return stat.isDirectory();
+});
+
+interface Addon {
+	name: string;
+	description: string;
+	id: string;
+}
+
+const addons: Addon[] = await Promise.all(
+	addonDirs.map(async (dir) => {
+		const addonJson = (await Bun.file(
+			`./addons/${dir}/addon.json`,
+		).json()) as { name: string; description: string };
+		return {
+			name: addonJson.name,
+			description: addonJson.description,
+			id: dir,
+		};
+	}),
+);
 
 const data = await p.group(
 	{
+		template: async () => {
+			if (templates.length === 1) {
+				return templates[0];
+			}
+			const template = await p.select({
+				message: "Select a template",
+				options: templates.map((template) => ({
+					label: template,
+					value: template,
+				})),
+			});
+			return template;
+		},
 		title: () =>
 			cliTitle
 				? Promise.resolve(cliTitle)
@@ -53,7 +92,6 @@ const data = await p.group(
 			}
 			return Promise.resolve();
 		},
-
 		description: () =>
 			p.text({ message: "Module Description?", defaultValue: "" }),
 		version: () =>
@@ -99,37 +137,52 @@ const data = await p.group(
 						defaultValue: results.title,
 					})
 				: Promise.resolve(),
+		enabledAddons: () =>
+			addons.length > 0
+				? p.multiselect({
+						message: "Enable addons?",
+						required: false,
+						options: addons.map((addon) => ({
+							label: `${addon.name} - ${addon.description}`,
+							value: addon.id,
+						})),
+					})
+				: Promise.resolve([]),
 	},
 	{ onCancel: () => process.exit(0) },
 );
 
 await p.tasks([
 	{
-		title: "Deleting existing directory",
+		title: "[Task] Deleting existing directory",
 		enabled: deleteFolder,
 		task: async () => {
 			if (deleteFolder) rmSync(data.id, { recursive: true });
-			return "Existing directory deleted";
+			return "✅ Existing directory deleted";
 		},
 	},
 	{
-		title: "Making directory",
+		title: "[Task] Making directory",
 		task: async () => {
 			await mkdir(data.id, { recursive: true });
-			return "Directory created";
+			return `✅ ${data.id} directory created`;
 		},
 	},
 	{
-		title: "Copying template",
+		title: "[Task] Copying template",
 		task: async () => {
-			await cp(new URL("../templates/default", import.meta.url), data.id, {
-				recursive: true,
-			});
-			return "Template copied";
+			await cp(
+				new URL(`../templates/${data.template}`, import.meta.url),
+				data.id,
+				{
+					recursive: true,
+				},
+			);
+			return "✅ Template copied";
 		},
 	},
 	{
-		title: "Writing module.json",
+		title: "[Task] Writing module.json",
 		task: async () => {
 			const modPath = `${data.id}/module.json`;
 			const mod = (await Bun.file(modPath).json()) as Record<string, any>;
@@ -146,8 +199,6 @@ await p.tasks([
 			mod.relationships.system = data.system.map((system) =>
 				systems.find((s) => s.id === system),
 			);
-			mod.esmodules = [`dist/${data.id}.js`];
-			mod.styles = [`dist/${data.id}.css`];
 			mod.packs = data.packs.flatMap((pack) =>
 				data.system.map((system) => ({ ...pack, system })),
 			);
@@ -171,10 +222,12 @@ await p.tasks([
 			}
 
 			await Bun.write(modPath, JSON.stringify(mod, null, "\t"));
+
+			return "✅ module.json created";
 		},
 	},
 	{
-		title: "Writing README.md",
+		title: "[Task] Writing README.md",
 		task: async () => {
 			const readmePath = `${data.id}/README.md`;
 			const readme = `# ${data.title}
@@ -204,8 +257,54 @@ await p.tasks([
 			`;
 
 			await Bun.write(readmePath, readme);
+
+			return "✅ README.md created";
 		},
 	},
 ]);
+
+// Run enabled addons
+if (data.enabledAddons && data.enabledAddons.length > 0) {
+	for (const addonId of data.enabledAddons) {
+		p.note(`[Addon] Running ${addonId} setup...`);
+		const addonProcess = Bun.spawn(
+			["bun", "run", `addons/${addonId}/setup.ts`],
+			{
+				stdio: ["inherit", "inherit", "inherit"],
+				env: {
+					...process.env,
+					MODULE_DIR: data.id,
+					ADDON_ID: addonId,
+				},
+			},
+		);
+		await addonProcess.exited;
+
+		if (addonProcess.exitCode !== 0) {
+			throw new Error(`❗ Addon ${addonId} setup failed`);
+		}
+	}
+}
+
+// Check if template has an scripts/onCreate, ask to run it
+const onCreatePath = `${data.id}/scripts/onCreate.ts`;
+if (await Bun.file(onCreatePath).exists()) {
+	const runOnCreate = await p.confirm({
+		message: `Run onCreate script?`,
+		initialValue: true,
+	});
+	if (runOnCreate) {
+		const spin = p.spinner();
+		spin.start("[Task] Running onCreate script...");
+		const process = Bun.spawn(["bun", "run", "onCreate.ts"], {
+			cwd: `${data.id}/scripts`,
+		});
+		await process.exited;
+		if (process.exitCode !== 0) {
+			throw new Error(`❗ onCreate script failed`);
+		}
+		spin.stop("✅ onCreate script completed");
+	}
+}
 
 p.outro(`cd ${cyan(data.id)} && bun install`);

@@ -1,0 +1,15 @@
+{
+	"name": "new-module",
+	"type": "module",
+	"private": true,
+	"license": "MIT",
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite"
+	},
+	"devDependencies": {},
+	"browserslist": [
+		">5%",
+		"not IE 11"
+	]
+}

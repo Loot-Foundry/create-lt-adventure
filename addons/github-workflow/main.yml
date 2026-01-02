@@ -1,0 +1,48 @@
+name: Release Creation
+
+on:
+    release:
+        types: [published]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: oven-sh/setup-bun@v2
+
+            - name: Extract version from tag without the v
+              id: get-version
+              run: echo "v=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+            - name: Substitute Manifest and Download Links For Versioned Ones
+              id: sub_manifest_link_version
+              uses: microsoft/variable-substitution@v1
+              with:
+                  files: module.json
+              env:
+                  flags.canUpload: false
+                  version: ${{ steps.get-version.outputs.v }}
+
+            - name: Install packages
+              run: bun ci
+
+            - name: Build distribution
+              run: bun run build
+
+              # Create a zip file with all files required by the module to add to the release.
+            - name: Bundle into ZIP file
+              run: zip -r ./module.zip module.json assets/ dist/ packs/
+
+              # Create a release for this specific version.
+            - name: Update Release with Files
+              id: create_version_release
+              uses: ncipollo/release-action@v1
+              with:
+                  allowUpdates: true # Set this to false if you want to prevent updating existing releases.
+                  name: ${{ github.event.release.name }}
+                  tag: ${{ github.event.release.tag_name }}
+                  body: ${{ github.event.release.body }}
+                  artifacts: "./module.json, ./module.zip"
+                  omitDraftDuringUpdate: true
+                  omitPrereleaseDuringUpdate: true
