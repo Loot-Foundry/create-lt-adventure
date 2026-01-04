@@ -1,5 +1,6 @@
 import type { Plugin, UserConfig } from "vite";
 import path from "node:path";
+import fs from 'node:fs';
 import vttSync from "foundryvtt-sync";
 import { defineConfig } from "vite";
 import moduleJSON from "./module.json" with { type: "json" };
@@ -8,7 +9,7 @@ import postcssPresetEnv from "postcss-preset-env";
 const target = "es2022"; // Build target for the vinal bundle.
 const foundryPort = 30000; // Which port your FoundryVTT instance is hosted at.
 const devPort = 30001; // Which port you want to use for development.
-const libEntry = "/index.ts"; // The main entry file to begin crawling from (root being `src/`).
+const libEntry = "index.ts"; // The main entry file to begin crawling from (root being `src/`).
 
 const postcss = {
 	inject: false,
@@ -64,7 +65,7 @@ export default defineConfig(({ mode: _mode }) => {
 			sourcemap: true, // Provide a publicly available sourcemap for debuggin purposes.
 			target,
 			lib: {
-				entry: libEntry,
+				entry: "./" + libEntry,
 				formats: ["es"],
 				fileName: moduleJSON.id,
 			},
@@ -78,7 +79,19 @@ export default defineConfig(({ mode: _mode }) => {
 		},
 
 		plugins: [
-			vttSync(moduleJSON, {}) as Plugin[],
+			vttSync(moduleJSON, {}) as Plugin[], // Build the database from JSON files on build
+			{
+				name: 'create-dist-files', // Create dummy files for Foundry's tests to pass
+				apply: 'serve',
+				buildStart() {
+					if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+
+					const files = [...moduleJSON.esmodules, ...moduleJSON.styles];
+					for (const name of files) {
+						fs.writeFileSync(name, '', { flag: 'a' });
+					}
+				},
+			},
 		],
 	} satisfies UserConfig;
 });

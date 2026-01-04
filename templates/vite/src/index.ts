@@ -1,1 +1,1 @@
-import "module.css";
+import "./module.css";

@@ -191,10 +191,10 @@ await p.tasks([
 			mod.id = data.id;
 			mod.title = data.title;
 			mod.description = data.description;
-			mod.version = {
+			mod.compatibility = {
 				minimum: data.version,
 				verified: data.version,
-				maximum: data.version + 1,
+				// maximum: data.version + 1,
 			};
 			mod.relationships.system = data.system.map((system) =>
 				systems.find((s) => s.id === system),
