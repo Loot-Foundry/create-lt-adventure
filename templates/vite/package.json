@@ -6,7 +6,8 @@
 	"scripts": {
 		"build": "vite build",
 		"dev": "vite",
-		"extract": "node scripts/extractPacks.mjs"
+		"extract": "node scripts/extractPacks.mjs",
+		"symlink": "node scripts/symlink.mjs"
 	},
 	"devDependencies": {
 		"@foundryvtt/foundryvtt-cli": "^3.0.2",

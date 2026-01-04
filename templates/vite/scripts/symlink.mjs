@@ -20,14 +20,10 @@ const symlinkPath = resolve(dataPath, "modules", moduleJSON.id);
 const symlinkStats = lstatSync(symlinkPath, { throwIfNoEntry: false });
 if (symlinkStats) {
 	const atPath = symlinkStats.isDirectory() ? "folder" : symlinkStats.isSymbolicLink() ? "symlink" : "file";
-	const proceed = (
-		await prompts({
-			type: "confirm",
-			name: "value",
-			initial: false,
-			message: `A "${moduleJSON.id}" ${atPath} already exists in the "modules" subfolder. Replace with new symlink?`,
-		})
-	).value;
+	const proceed = await p.confirm({
+		initialValue: false,
+		message: `A "${moduleJSON.id}" ${atPath} already exists in the "modules" subfolder. Replace with new symlink?`,
+	});
 	if (!proceed) {
 		console.log("Aborting.");
 		process.exit();
