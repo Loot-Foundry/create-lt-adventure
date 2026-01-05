@@ -13,6 +13,7 @@
 		"@foundryvtt/foundryvtt-cli": "^3.0.2",
 		"foundryvtt-sync": "https://github.com/MrVauxs/FoundryVTT-Sync",
 		"postcss-preset-env": "^10.6.0",
+		"@clack/prompts": "^1.0.0-alpha.9",
 		"vite": "^7.3.0"
 	},
 	"browserslist": [
