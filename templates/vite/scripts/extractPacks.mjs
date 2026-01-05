@@ -5,6 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import * as p from "@clack/prompts";
 import { extractPack } from "@foundryvtt/foundryvtt-cli";
+import { yellow } from "kolorist";
 // import moduleJSON from "../module.json" with { type: "json" };
 
 const foundryDataDir = "packs/";
@@ -20,28 +21,30 @@ if (!existsSync(packsCompiled)) {
 
 const packFolders = await fs.readdir(packsCompiled);
 
-const prog = p.progress({ max: packFolders.length })
+if (packFolders.length === 0) p.log.info("No packs to extract!")
 
-prog.start("Extracting...")
-
-for (const pack of packFolders) {
-	if (!existsSync(`${jsonDataDir}/${pack}`)) {
-		await fs.mkdir(`${jsonDataDir}/${pack}`);
-	}
-	await extractPack(
-		path.resolve(packsCompiled, pack),
-		`${jsonDataDir}/${pack}`,
-		{
-			expandAdventures: true,
-			omitVolatile: true,
-			folders: false,
-			clean: true,
-			log: false
-		},
-	);
-	prog.advance(1, `Extracted /${pack} directory.`)
-}
-
-prog.stop("Extraction Complete.")
+await p.tasks(
+	packFolders.map(pack => ({
+		title: `Extracting ${pack}...`,
+		task: async () => {
+			if (!existsSync(`${jsonDataDir}/${pack}`)) {
+				await fs.mkdir(`${jsonDataDir}/${pack}`);
+			}
+			await extractPack(
+				path.resolve(packsCompiled, pack),
+				`${jsonDataDir}/${pack}`,
+				{
+					expandAdventures: true,
+					omitVolatile: true,
+					folders: false,
+					clean: true,
+					log: false
+				},
+			);
+			return `Extracted ${yellow(pack)}!`
+		}
+	})),
+	{}
+);
 
 p.outro("Finished!");
