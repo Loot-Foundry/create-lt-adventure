@@ -38,21 +38,23 @@ export class LootTavernSheet extends DnDSheet {
 		const docSheetConfigWidth = foundry.applications.apps.DocumentSheetConfig.DEFAULT_OPTIONS.position.width;
 		const fields = foundry.applications.fields;
 
-		const headersInput = fields.createCheckboxInput({ name: "helianaHeaders", value: this.document.getFlag(moduleJSON.id, "helianaHeaders") })
+		const placeholder = `modules/${moduleJSON.id}/assets/setup.webp`
+
+		const headersInput = fields.createCheckboxInput({ name: "helianaHeaders", value: this.document.getFlag(moduleJSON.id, "helianaHeaders"), placeholder })
 		const selectGroup = fields.createFormGroup({
 			input: headersInput,
 			label: "Heliana-styled Headers",
 			hint: undefined
 		})
 
-		const imageInput = fields.createTextInput({ name: "image", value: this.document.getFlag(moduleJSON.id, "image") })
+		const imageInput = fields.createTextInput({ name: "image", value: this.document.getFlag(moduleJSON.id, "image"), placeholder })
 		const imageGroup = fields.createFormGroup({
 			input: imageInput,
 			label: "Main Image",
 			hint: undefined
 		})
 
-		const sidebarImageInput = fields.createTextInput({ name: "sidebarImage", value: this.document.getFlag(moduleJSON.id, "sidebarImage") })
+		const sidebarImageInput = fields.createTextInput({ name: "sidebarImage", value: this.document.getFlag(moduleJSON.id, "sidebarImage"), placeholder })
 		const sidebarImageGroup = fields.createFormGroup({
 			input: sidebarImageInput,
 			label: "Sidebar Background Image",
