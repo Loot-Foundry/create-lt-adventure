@@ -189,6 +189,9 @@
   font-weight: bold;
   color: #074e4b;
 }
+.themed.theme-dark .((moduleId)).Checks-and-Saves {
+  color: hsl(69 58 47);
+}
 
 .((moduleId))-journal.application {
   &:not(.minimized) {
