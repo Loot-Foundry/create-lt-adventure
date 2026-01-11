@@ -4,6 +4,9 @@ import { homedir } from "node:os";
 import process from "node:process";
 import * as p from "@clack/prompts";
 import moduleJSON from "../module.json" with { type: "json" };
+import { yellow } from "kolorist";
+
+p.intro(`${moduleJSON.id} symlink script`)
 
 // Store config in user's home directory
 const configPath = resolve(homedir(), ".foundry-symlink-config.json");
@@ -21,25 +24,28 @@ const windowsInstructions = process.platform === "win32" ? " Start with a drive 
 const lastFolder = lastPath ? `(last: ${lastPath})` : "";
 const promptPath = await p.text({
 	message: `Enter the full path to your Foundry data folder.${windowsInstructions}`,
-	placeholder: lastFolder,
-	initialValue: lastFolder,
+	placeholder: lastPath,
+	initialValue: lastPath,
+	validate(val) {
+		const value = val.replace(/\W*$/, "").trim();
+		if (!value || !/\bData$/.test(value)) {
+			return (`"${value}" does not contain ${yellow('/Data')}`);
+		}
+	}
 });
 
 let dataPath = promptPath.replace(/\W*$/, "").trim();
 
-if (!dataPath || !/\bData$/.test(dataPath)) {
-	console.error(`"${dataPath}" does not look like a Foundry data folder.`);
-	process.exit(1);
-}
+if (dataPath !== lastPath) {
+	// Ask if user wants to save the path
+	const shouldSave = await p.confirm({
+		initialValue: true,
+		message: `Save "${dataPath}" for future use?`,
+	});
 
-// Ask if user wants to save the path
-const shouldSave = await p.confirm({
-	initialValue: true,
-	message: `Save "${dataPath}" for future use?`,
-});
-
-if (shouldSave) {
-	writeFileSync(configPath, JSON.stringify({ dataPath }, null, 2));
+	if (shouldSave) {
+		writeFileSync(configPath, JSON.stringify({ dataPath }, null, 2));
+	}
 }
 
 const symlinkPath = resolve(dataPath, "modules", moduleJSON.id);
@@ -51,8 +57,8 @@ if (symlinkStats) {
 		message: `A "${moduleJSON.id}" ${atPath} already exists in the "modules" subfolder. Replace with new symlink?`,
 	});
 	if (!proceed) {
-		console.log("Aborting.");
-		process.exit();
+		p.cancel("Aborting.");
+		process.exit(0);
 	}
 }
 
@@ -70,4 +76,4 @@ try {
 	}
 }
 
-console.log(`Symlink successfully created at "${symlinkPath}"!`);
+p.outro(`Symlink successfully created at "${symlinkPath}"!`);
