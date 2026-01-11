@@ -247,6 +247,8 @@ await p.tasks([
 					cd ${data.id} ${hasPackageJSON() ? "&& bun install": "and get to making stuff!"}
 					\`\`\`
 
+					## Resources
+
 					${
 						data.system.includes("dnd5e")
 							? `
