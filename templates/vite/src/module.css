@@ -1,50 +1,58 @@
+.((moduleId))-journal .journal-entry-content .sidebar,
+.editor-content .((moduleId)).sidebar {
+  /* font-family: "Candara"; */
+
+  padding: 0.75rem;
+  margin-block: 1.25rem;
+  width: var(--sidebarWidth, 50%);
+  float: right;
+  background: oklch(0.393 0.095 152.535 / 0.05);
+
+  .themed.theme-dark & {
+    background: oklch(0.393 0.095 152.535 / 0.2);
+  }
+
+  margin-right: 0.25rem;
+  margin-left: 1rem;
+
+  &.left {
+    margin-left: 0rem;
+    margin-right: 1.5rem;
+    float: left;
+  }
+
+  & h1,
+  & h2,
+  & h3,
+  & h4 {
+    color: hsl(179, 100%, 10%);
+    .themed.theme-dark & {
+      color: hsl(120, 25%, 90%);
+    }
+    font-family: "Modesto Condensed";
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    border-color: none;
+    text-decoration-line: none;
+    padding: 0px;
+    margin: 0px;
+  }
+
+  border-image-slice: 50 75 50 75;
+  border-image-width: 20px 26px 20px 26px;
+  border-image-outset: 19px 0px 19px 0px;
+  border-image-repeat: round round;
+  border-image-source: url("modules/((moduleId))/assets/journals/Sidebar_Frame_Green.webp");
+
+  &.brown {
+    border-image-source: url("modules/((moduleId))/assets/journals/Sidebar_Frame_Brown.webp");
+  }
+}
+
 .((moduleId))-journal .journal-entry-content {
   /* font-family: "Kings Caslon"; */
   text-align: justify;
-
-  .sidebar {
-    /* font-family: "Candara"; */
-
-    padding: 0.75rem;
-    margin-block: 1.25rem;
-    width: var(--sidebarWidth, 50%);
-    float: right;
-    background: oklch(0.393 0.095 152.535 / 0.05);
-
-    margin-right: 0.25rem;
-    margin-left: 1rem;
-
-    &.left {
-      margin-left: 0rem;
-      margin-right: 1.5rem;
-      float: left;
-    }
-
-    & h1,
-    & h2,
-    & h3,
-    & h4 {
-      color: hsl(179, 100%, 10%);
-      font-family: "Modesto Condensed";
-      font-size: 1.5rem;
-      font-weight: 700;
-      text-align: center;
-      border-color: none;
-      text-decoration-line: none;
-      padding: 0px;
-      margin: 0px;
-    }
-
-    border-image-slice: 50 75 50 75;
-    border-image-width: 20px 25px 20px 26px;
-    border-image-outset: 20px 0px 20px 0px;
-    border-image-repeat: round round;
-    border-image-source: url("modules/((moduleId))/assets/journals/Sidebar_Frame_Green.webp");
-
-    &.brown {
-      border-image-source: url("modules/((moduleId))/assets/journals/Sidebar_Frame_Brown.webp");
-    }
-  }
 
   blockquote,
   .readaloud {
@@ -66,6 +74,10 @@
     border-image-outset: 6px 6px 6px 6px;
     border-image-repeat: stretch stretch;
     border-image-source: url("modules/((moduleId))/assets/journals/Read-Aloud_Corner.webp");
+
+    .themed.theme-dark & {
+      background: hsl(25, 30%, 75%, 15%);
+    }
 
     em {
       font-style: italic;
@@ -140,7 +152,7 @@
       bottom: calc(50% - var(--height) / 2);
 
       text-align: center;
-      font-size: 1.2rem;
+      font-size: 2rem;
       line-height: var(--height);
       font-family: "Coinage Caps Kruger Gray";
       color: white;
@@ -171,6 +183,11 @@
       margin-inline: 16px;
     }
   }
+}
+
+.((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: #074e4b;
 }
 
 .((moduleId))-journal.application {
