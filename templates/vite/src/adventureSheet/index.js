@@ -1,4 +1,4 @@
-import moduleJSON from "moduleJSON" with { type: "json" };
+import moduleJSON from "moduleJSON";
 
 const affectedDocuments = ["journal"];
 
@@ -115,12 +115,19 @@ export class LootTavernSheet extends DnDSheet {
 
 			const scenery = scrollable.querySelector(".scenery");
 
-			scrollable.addEventListener("scroll", (event) => {
-				const target = event.target;
+			scrollable.addEventListener("scroll", ({ target }) => {
 				const opacity = Math.max(10, 100 - target.scrollTop / 2);
 				scenery.style.opacity = `${opacity}%`;
 				scenery.style.pointerEvents = opacity < 50 ? "none" : "auto";
 			});
+
+
+			const header = html.querySelector("header.journal-header");
+			header.remove();
+
+			const title = document.createElement('header');
+			title.textContent = this.document.name;
+			scenery.appendChild(title);
 		}
 
 		// Level Select

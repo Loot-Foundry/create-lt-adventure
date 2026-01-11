@@ -101,6 +101,84 @@
       margin-bottom: 0;
     }
   }
+
+  .mask {
+    --mask-size: 40%;
+    border: none;
+    mask-image:
+      url("modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
+      linear-gradient(white 0 0);
+    mask-composite: add;
+    mask-mode: luminance;
+    mask-position:
+      top right,
+      bottom;
+    mask-size:
+      101% var(--mask-size),
+      101% calc(101% - var(--mask-size));
+    mask-repeat: no-repeat;
+
+    &.upside-down {
+      transform: scaleY(-1);
+    }
+  }
+
+  .scrollable div.scenery {
+    position: sticky;
+    display: relative;
+    top: 0;
+    transition: opacity 300ms ease-out;
+    margin-bottom: -2rem;
+    margin-inline: 0px;
+    scale: 101%;
+
+    &.upside-down > * {
+      width: 100%;
+      transform: scaleY(-1);
+    }
+
+    & > header {
+      --height: 10rem;
+      position: absolute;
+      width: 100%;
+      height: var(--height);
+      bottom: calc(50% - var(--height) / 2);
+
+      text-align: center;
+      font-size: 1.25rem;
+      line-height: var(--height);
+      font-family: "Coinage Caps Kruger Gray";
+      color: white;
+
+      background: rgba(0, 0, 0, 66%);
+
+      border: none;
+      mask-image:
+        url("modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
+        url("modules/((moduleId))/assets/journals/masks/flipped/mask-soft-04.webp");
+      mask-composite: add;
+      mask-mode: luminance;
+      mask-position: top, bottom;
+      mask-size:
+        100% 51%,
+        100% 50%;
+      mask-repeat: no-repeat;
+    }
+
+    & img {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      cursor: pointer;
+    }
+  }
+
+  .journal-entry-pages {
+    margin: 0;
+    padding-right: 0;
+    & > * {
+      margin-inline: 16px;
+    }
+  }
 }
 
 .((moduleId))-journal.application {
