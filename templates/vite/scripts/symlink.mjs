@@ -1,20 +1,39 @@
-import { lstatSync, rmSync, symlinkSync, unlinkSync } from "node:fs";
+import { lstatSync, rmSync, symlinkSync, unlinkSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { homedir } from "node:os";
 import process from "node:process";
 import * as p from "@clack/prompts";
 import moduleJSON from "../module.json" with { type: "json" };
 
+// Store config in user's home directory
+const configPath = resolve(homedir(), ".foundry-symlink-config.json");
+
+// Load last known path from config
+let lastPath = null;
+try {
+	const config = JSON.parse(readFileSync(configPath, "utf-8"));
+	lastPath = config.dataPath;
+} catch {
+	// Config doesn't exist yet, that's fine
+}
+
 const windowsInstructions = process.platform === "win32" ? " Start with a drive letter (\"C:\\\")." : "";
+const lastFolder = lastPath ? `(last: ${lastPath})` : "";
 const promptPath = await p.text({
 	message: `Enter the full path to your Foundry data folder.${windowsInstructions}`,
-	placeholder: ""
-})
+	placeholder: lastFolder,
+	initialValue: lastFolder,
+});
+
 let dataPath = promptPath.replace(/\W*$/, "").trim();
 
 if (!dataPath || !/\bData$/.test(dataPath)) {
 	console.error(`"${dataPath}" does not look like a Foundry data folder.`);
 	process.exit(1);
 }
+
+// Save the path for next time
+writeFileSync(configPath, JSON.stringify({ dataPath }, null, 2));
 
 const symlinkPath = resolve(dataPath, "modules", moduleJSON.id);
 const symlinkStats = lstatSync(symlinkPath, { throwIfNoEntry: false });
