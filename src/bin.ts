@@ -152,6 +152,14 @@ const data = await p.group(
 	{ onCancel: () => process.exit(0) },
 );
 
+function hasPackageJSON(path: string = data.id) {
+	try {
+		return existsSync(`${path}/package.json`);
+	} catch {
+		return false;
+	}
+}
+
 await p.tasks([
 	{
 		title: "[Task] Deleting existing directory",
@@ -236,7 +244,7 @@ await p.tasks([
 					## Installation
 
 					\`\`\`
-					cd ${data.id} && bun install
+					cd ${data.id} ${hasPackageJSON() ? "&& bun install": "and get to making stuff!"}
 					\`\`\`
 
 					${
@@ -307,4 +315,4 @@ if (await Bun.file(onCreatePath).exists()) {
 	}
 }
 
-p.outro(`cd ${cyan(data.id)} && bun install`);
+p.outro(`cd ${cyan(data.id)} ${hasPackageJSON() ? "&& bun install": "and get to making stuff!"}`);
