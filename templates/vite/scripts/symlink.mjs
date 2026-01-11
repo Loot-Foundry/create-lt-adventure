@@ -32,8 +32,15 @@ if (!dataPath || !/\bData$/.test(dataPath)) {
 	process.exit(1);
 }
 
-// Save the path for next time
-writeFileSync(configPath, JSON.stringify({ dataPath }, null, 2));
+// Ask if user wants to save the path
+const shouldSave = await p.confirm({
+	initialValue: true,
+	message: `Save "${dataPath}" for future use?`,
+});
+
+if (shouldSave) {
+	writeFileSync(configPath, JSON.stringify({ dataPath }, null, 2));
+}
 
 const symlinkPath = resolve(dataPath, "modules", moduleJSON.id);
 const symlinkStats = lstatSync(symlinkPath, { throwIfNoEntry: false });
