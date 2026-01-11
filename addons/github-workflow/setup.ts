@@ -13,7 +13,7 @@ const data = await p.group(
 		features: () =>
 			p.multiselect({
 				message: "Additional features?",
-				initialValues: [],
+				initialValues: ["ftp", "discord"],
         required: false,
 				options: [
 					// { label: "Prereleases", value: "prereleases" },

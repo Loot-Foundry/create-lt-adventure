@@ -5,18 +5,28 @@ import vttSync from "foundryvtt-sync";
 import { defineConfig } from "vite";
 import moduleJSON from "./module.json" with { type: "json" };
 import postcssPresetEnv from "postcss-preset-env";
+import PostCSSReplace from "postcss-replace";
 import 'dotenv/config'
 
 const target = "es2022"; // Build target for the vinal bundle.
 const foundryPort = Number(process.env.FOUNDRY_PORT || 30000); // Which port your FoundryVTT instance is hosted at.
 const devPort = Number(process.env.DEV_PORT || 30001); // Which port you want to use for development.
-const libEntry = "index.ts"; // The main entry file to begin crawling from (root being `src/`).
+const libEntry = "index.js"; // The main entry file to begin crawling from (root being `src/`).
 
 const postcss = {
 	inject: false,
 	sourceMap: true,
 	extensions: [".css"],
-	plugins: [postcssPresetEnv],
+	plugins: [
+		postcssPresetEnv,
+		PostCSSReplace({
+			pattern: /\(\(\s?(\S+?)\s?\)\)/g,
+			commentsOnly: false,
+			data: {
+				moduleId: moduleJSON.id,
+			},
+		}),
+	],
 };
 
 const PACKAGE_ID = `modules/${moduleJSON.id}`;

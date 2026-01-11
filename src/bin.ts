@@ -117,6 +117,7 @@ const data = await p.group(
 			p.multiselect({
 				message: "What Packs?",
 				required: false,
+				initialValues: packs,
 				options: packs.map((pack) => ({
 					label: pack.label,
 					value: pack,
