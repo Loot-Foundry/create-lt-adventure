@@ -6,9 +6,14 @@
   margin-block: 1.25rem;
   width: var(--sidebarWidth, 50%);
   float: right;
-  background: oklch(0.393 0.095 152.535 / 0.05);
 
-  .themed.theme-dark & {
+  .themed.theme-light &,
+  body.theme-light & {
+    background: oklch(0.393 0.095 152.535 / 0.05);
+  }
+
+  .themed.theme-dark &,
+  body.theme-dark & {
     background: oklch(0.393 0.095 152.535 / 0.2);
   }
 
@@ -185,22 +190,53 @@
   }
 }
 
-.((moduleId)).Checks-and-Saves {
+body.theme-light .((moduleId)).Checks-and-Saves {
   font-weight: bold;
   color: #074e4b;
 }
+
+body.theme-dark .((moduleId)).Checks-and-Saves {
+  color: hsl(69 58 47);
+}
+
 .themed.theme-dark .((moduleId)).Checks-and-Saves {
   color: hsl(69 58 47);
 }
 
+.themed.theme-light .((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: #074e4b;
+}
+
 .((moduleId))-journal.application {
   &:not(.minimized) {
-    border-image: var(
-        --urlBorderImage,
-        url("modules/((moduleId))/assets/journals/borders/panel-border-026.webp")
-      )
-      32 32 32 32 fill / 32px 32px 32px 32px;
-    padding: 0 4px;
+    --ltBorderCut: 32;
+    --ltBorderOutset: 32;
+    corner-top-left-shape: notch;
+    corner-top-right-shape: notch;
+    corner-bottom-left-shape: notch;
+    border-radius: var(--ltBorderRadius, 15px);
+    border-bottom-right-radius: 0;
+    overflow: visible;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% + var(--ltBorderSizeMod, 0px));
+      height: calc(100% + var(--ltBorderSizeMod, 0px));
+      border-image: var(
+          --urlBorderImage,
+          url("modules/((moduleId))/assets/journals/borders/panel-border-026.webp")
+        )
+        var(--ltBorderCut) var(--ltBorderCut) var(--ltBorderCut)
+        var(--ltBorderCut) fill / calc(1px * var(--ltBorderOutset))
+        calc(1px * var(--ltBorderOutset)) calc(1px * var(--ltBorderOutset))
+        calc(1px * var(--ltBorderOutset));
+      pointer-events: none;
+    }
   }
 
   &:not(.minimized) .window-header {

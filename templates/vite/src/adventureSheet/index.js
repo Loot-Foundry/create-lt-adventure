@@ -125,6 +125,168 @@ export class LootTavernSheet extends DnDSheet {
 		const borderNumber = this.document.getFlag(moduleJSON.id, "borderNumber");
 		if (!isNaN(borderNumber)) html.style.setProperty("--urlBorderImage", `url("/modules/${moduleJSON.id}/assets/journals/borders/panel-border-${("00" + Number(borderNumber)).slice(-3)}.webp")`);
 
+		let borderRadius = "7px";
+		let borderSizeMod = "0px";
+		let borderCut = "32";
+		let borderOutset = "32";
+		switch (Number(borderNumber)) {
+			case 0: {
+				borderRadius = `7px`;
+				borderSizeMod = `25px`;
+				break;
+			}
+			case 1: {
+				borderRadius = `15px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 2: {
+				borderRadius = `15px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 3: {
+				borderRadius = `0px`;
+				borderSizeMod = `35px`;
+				break;
+			}
+			case 4: {
+				borderRadius = `6px`;
+				borderSizeMod = `20px`;
+				break;
+			}
+			case 5: {
+				borderRadius = `0px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 6: {
+				borderRadius = `10px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 7: {
+				borderRadius = `15px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 8:
+			case 9: {
+				borderRadius = `10px`;
+				borderSizeMod = `12px`;
+				break;
+			}
+			case 10: {
+				borderRadius = `16px`;
+				borderSizeMod = `5px`;
+				break;
+			}
+			case 11:
+			case 12: {
+				borderRadius = `16px`;
+				borderSizeMod = `5px`;
+				break;
+			}
+			case 13: {
+				borderRadius = `12px`;
+				borderSizeMod = `5px`;
+				break;
+			}
+			case 14: {
+				borderRadius = `10px`;
+				borderSizeMod = `20px`;
+				break;
+			}
+			case 15: {
+				borderRadius = `0px`;
+				borderSizeMod = `5px`;
+				break;
+			}
+			case 16: {
+				borderRadius = `8px`;
+				borderSizeMod = `10px`;
+				break;
+			}
+			case 17: {
+				borderRadius = `11px`;
+				borderSizeMod = `10px`;
+				break;
+			}
+			case 18:
+			case 19: {
+				borderRadius = `16px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 20: {
+				borderRadius = `0px`;
+				borderSizeMod = `10px`;
+				borderCut = `40`
+				borderOutset = `46`
+				break;
+			}
+			case 21: {
+				borderRadius = `25px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 22: {
+				borderRadius = `10px`;
+				borderSizeMod = `6px`;
+				break;
+			}
+			case 23: {
+				borderRadius = `24px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 24: {
+				borderRadius = `0px`;
+				borderSizeMod = `50px`;
+				break;
+			}
+			case 25: {
+				borderRadius = `27px`;
+				borderSizeMod = `0px`;
+				borderCut = `40`
+				borderOutset = `32`
+				break;
+			}
+			case 26: {
+				borderRadius = `30px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			case 27: {
+				borderRadius = `0px`;
+				borderSizeMod = `8px`;
+				break;
+			}
+			case 28: {
+				borderRadius = `15px`;
+				borderSizeMod = `8px`;
+				break;
+			}
+			case 29: {
+				borderRadius = `15px`;
+				borderSizeMod = `8px`;
+				break;
+			}
+			case 30: {
+				borderRadius = `15px`;
+				borderSizeMod = `0px`;
+				break;
+			}
+			default: {
+				console.log("wtf??", borderNumber)
+			}
+		}
+
+		html.style.setProperty("--ltBorderRadius", borderRadius);
+		html.style.setProperty("--ltBorderSizeMod", borderSizeMod);
+		html.style.setProperty("--ltBorderCut", borderCut);
+		html.style.setProperty("--ltBorderOutset", borderOutset);
+
 		if (this.mode === 2) {
 			const imgPath = this.document.flags[moduleJSON.id]?.image;
 			if (!imgPath) return;
