@@ -121,7 +121,7 @@ export class LootTavernSheet extends DnDSheet {
 		const sidebarImg = this.document.getFlag(moduleJSON.id, "sidebarImage");
 		if (sidebarImg) html.style.setProperty("--sidebarImage", `url("/${sidebarImg}")`);
 
-		if (borderNumber) html.style.setProperty("--urlBorderImage", `url("modules/${moduleJSON.id}/assets/journals/borders/panel-border-${borderNumber}.webp")`);
+		if (!isNaN(borderNumber)) html.style.setProperty("--urlBorderImage", `url("modules/${moduleJSON.id}/assets/journals/borders/panel-border-${Number(borderNumber)}.webp")`);
 
 		if (this.mode === 2) {
 			const imgPath = this.document.flags[moduleJSON.id]?.image;
