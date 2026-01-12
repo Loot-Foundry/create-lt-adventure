@@ -63,7 +63,8 @@ export class LootTavernSheet extends DnDSheet {
 
 		const borderNumberInput = fields.createSelectInput({
 			options: Array(31).fill().map((x, i) => ({ label: i, value: i })),
-			name: 'borderNumber'
+			name: 'borderNumber',
+			value: this.document.getFlag(moduleJSON.id, "borderNumber") || 26,
 		})
 		const borderNumberGroup = fields.createFormGroup({
 			input: borderNumberInput,
@@ -121,7 +122,8 @@ export class LootTavernSheet extends DnDSheet {
 		const sidebarImg = this.document.getFlag(moduleJSON.id, "sidebarImage");
 		if (sidebarImg) html.style.setProperty("--sidebarImage", `url("/${sidebarImg}")`);
 
-		if (!isNaN(borderNumber)) html.style.setProperty("--urlBorderImage", `url("modules/${moduleJSON.id}/assets/journals/borders/panel-border-${Number(borderNumber)}.webp")`);
+		const borderNumber = this.document.getFlag(moduleJSON.id, "borderNumber");
+		if (!isNaN(borderNumber)) html.style.setProperty("--urlBorderImage", `url("/modules/${moduleJSON.id}/assets/journals/borders/panel-border-${("00" + Number(borderNumber)).slice(-3)}.webp")`);
 
 		if (this.mode === 2) {
 			const imgPath = this.document.flags[moduleJSON.id]?.image;
