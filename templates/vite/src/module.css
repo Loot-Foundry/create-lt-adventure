@@ -195,7 +195,10 @@
 
 .((moduleId))-journal.application {
   &:not(.minimized) {
-    border-image: url("modules/((moduleId))/assets/journals/borders/panel-border-026.webp")
+    border-image: var(
+        --urlBorderImage,
+        url("modules/((moduleId))/assets/journals/borders/panel-border-026.webp")
+      )
       32 32 32 32 fill / 32px 32px 32px 32px;
     padding: 0 4px;
   }

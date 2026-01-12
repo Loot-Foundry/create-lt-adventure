@@ -61,6 +61,23 @@ export class LootTavernSheet extends DnDSheet {
 			hint: undefined
 		})
 
+		const borderNumberInput = fields.createSelectInput({
+			options: Array(31).fill().map((x, i) => ({ label: i, value: i })),
+			name: 'borderNumber'
+		})
+		const borderNumberGroup = fields.createFormGroup({
+			input: borderNumberInput,
+			label: "Border Select",
+			hint: "Pick a style of border you want."
+		})
+
+		const formContent = [
+			selectGroup,
+			imageGroup,
+			sidebarImageGroup,
+			borderNumberGroup
+		]
+
 		const updateFlags = (flags) => this.document.update({ [`flags.${moduleJSON.id}`]: flags });
 
 		const dialog = new foundry.applications.api.DialogV2({
@@ -76,7 +93,7 @@ export class LootTavernSheet extends DnDSheet {
 				left: this.position.left + ((this.position.width - docSheetConfigWidth) / 2)
 			},
 			// ../../assets/Art/ReignOfIron-Landscape-Vertical.webp
-			content: `${selectGroup.outerHTML} ${imageGroup.outerHTML} ${sidebarImageGroup.outerHTML}`,
+			content: formContent.map(x => x.outerHTML).join(""),
 			buttons: [
 				{
 					action: "submit",
@@ -103,6 +120,8 @@ export class LootTavernSheet extends DnDSheet {
 		// Sidebar Background
 		const sidebarImg = this.document.getFlag(moduleJSON.id, "sidebarImage");
 		if (sidebarImg) html.style.setProperty("--sidebarImage", `url("/${sidebarImg}")`);
+
+		if (borderNumber) html.style.setProperty("--urlBorderImage", `url("modules/${moduleJSON.id}/assets/journals/borders/panel-border-${borderNumber}.webp")`);
 
 		if (this.mode === 2) {
 			const imgPath = this.document.flags[moduleJSON.id]?.image;
