@@ -22,17 +22,16 @@ const addonDirs = readdirSync("./addons").filter((item) => {
 interface Addon {
 	name: string;
 	description: string;
-	id: string;
+	default: boolean;
 }
 
-const addons: Addon[] = await Promise.all(
+const addons: (Addon & { id: string })[] = await Promise.all(
 	addonDirs.map(async (dir) => {
 		const addonJson = (await Bun.file(
 			`./addons/${dir}/addon.json`,
-		).json()) as { name: string; description: string };
+		).json()) as Addon;
 		return {
-			name: addonJson.name,
-			description: addonJson.description,
+			...addonJson,
 			id: dir,
 		};
 	}),
@@ -138,17 +137,22 @@ const data = await p.group(
 						defaultValue: results.title,
 					})
 				: Promise.resolve(),
-		enabledAddons: () =>
-			addons.length > 0
-				? p.multiselect({
-						message: "Enable addons?",
-						required: false,
-						options: addons.map((addon) => ({
-							label: `${addon.name} - ${addon.description}`,
-							value: addon.id,
-						})),
-					})
-				: Promise.resolve([]),
+		enabledAddons: () => {
+			if (addons.length > 0) {
+				return p.multiselect({
+					message: "Enable addons?",
+					required: false,
+					initialValues: addons.filter(x => x.default).map(x => x.id),
+					options: addons.map((addon) => ({
+						label: `${addon.name} - ${addon.description}`,
+						value: addon.id,
+					})),
+				})
+			}
+			else {
+				return Promise.resolve([])
+			}
+		},
 	},
 	{ onCancel: () => process.exit(0) },
 );
