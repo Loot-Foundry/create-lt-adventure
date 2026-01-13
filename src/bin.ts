@@ -78,10 +78,11 @@ const data = await p.group(
 					});
 		},
 		exists: async ({ results }: any) => {
-			const exists = existsSync(results.id);
+			const fullPath = resolve(process.cwd(), results.id);
+			const exists = existsSync(fullPath);
 			if (exists) {
 				const confirm = await p.confirm({
-					message: "Folder already exists. Overwrite?",
+					message: `Folder already exists at ${fullPath}. Overwrite?`,
 					initialValue: false,
 				});
 				if (!confirm) {
@@ -279,7 +280,7 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 	for (const addonId of data.enabledAddons) {
 		p.note(`[Addon] Running ${addonId} setup...`);
 		const addonProcess = Bun.spawn(
-			["bun", "run", `addons/${addonId}/setup.ts`],
+			["bun", "run", packageDir(`../addons/${addonId}/setup.ts`)],
 			{
 				stdio: ["inherit", "inherit", "inherit"],
 				env: {
