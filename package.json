@@ -47,11 +47,13 @@
 		"prepack": "npm run build",
 		"dev": "bun src/bin.ts \"My New Module\" --auto-id"
 	},
+	"dependencies": {
+		"kolorist": "^1.8.0",
+		"@clack/prompts": "^1.0.0-alpha.9"
+	},
 	"devDependencies": {
 		"@types/bun": "latest",
 		"@types/node": "^20",
-		"@clack/prompts": "^1.0.0-alpha.9",
-		"kolorist": "^1.8.0",
 		"typescript": "^5"
 	},
 	"peerDependencies": {

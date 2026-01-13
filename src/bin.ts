@@ -4,8 +4,15 @@ import { cyan } from "kolorist";
 import { mkdir, cp } from "fs/promises";
 import { packs, systems } from "./options.js";
 import { existsSync, readdirSync, rmSync, statSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 p.intro(`Creating a new Foundry VTT module...`);
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Change to script directory so relative paths work
+process.chdir(join(__dirname, ".."));
 
 let deleteFolder = false;
 const cliArgs = process.argv.slice(2);
