@@ -6,7 +6,7 @@ A CLI scaffolding tool for creating Foundry VTT modules.
 
 ### Global Installation (for end users)
 
-Once published to npm, you can install this globally:
+Once published to npm, you can install this globally with Bun:
 
 ```bash
 bun install -g create-fvtt-module

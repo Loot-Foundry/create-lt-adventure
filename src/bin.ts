@@ -1,38 +1,39 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import * as p from "@clack/prompts";
 import { cyan } from "kolorist";
 import { mkdir, cp } from "fs/promises";
 import { packs, systems } from "./options.js";
 import { existsSync, readdirSync, rmSync, statSync } from "fs";
+import { dirname, join, resolve } from "path";
+import { fileURLToPath } from "url";
 
 p.intro(`Creating a new Foundry VTT module...`);
+
+const packageDir = (d: string) => resolve(import.meta.dir, d);
 
 let deleteFolder = false;
 const cliArgs = process.argv.slice(2);
 const cliTitle = cliArgs[0];
 const autoId = cliArgs.includes("--auto-id");
 // Grab available templates from dir
-const templates = readdirSync("./templates");
+const templates = readdirSync(packageDir("../templates"));
 // Grab addons from addons/dirs
-const addonDirs = readdirSync("./addons").filter((item) => {
-	const stat = statSync(`./addons/${item}`);
+const addonDirs = readdirSync(packageDir("../addons")).filter((item) => {
+	const stat = statSync(packageDir(`../addons/${item}`));
 	return stat.isDirectory();
 });
 
 interface Addon {
 	name: string;
 	description: string;
-	id: string;
+	default: boolean;
 }
 
-const addons: Addon[] = await Promise.all(
+const addons: (Addon & { id: string })[] = await Promise.all(
 	addonDirs.map(async (dir) => {
-		const addonJson = (await Bun.file(
-			`./addons/${dir}/addon.json`,
-		).json()) as { name: string; description: string };
+		const addonJson = (await Bun.file(packageDir(`../addons/${dir}/addon.json`)).json()) as Addon;
 		return {
-			name: addonJson.name,
-			description: addonJson.description,
+			...addonJson,
 			id: dir,
 		};
 	}),
@@ -77,10 +78,11 @@ const data = await p.group(
 					});
 		},
 		exists: async ({ results }: any) => {
-			const exists = existsSync(`./${results.id}`);
+			const fullPath = resolve(process.cwd(), results.id);
+			const exists = existsSync(fullPath);
 			if (exists) {
 				const confirm = await p.confirm({
-					message: "Folder already exists. Overwrite?",
+					message: `Folder already exists at ${fullPath}. Overwrite?`,
 					initialValue: false,
 				});
 				if (!confirm) {
@@ -117,6 +119,7 @@ const data = await p.group(
 			p.multiselect({
 				message: "What Packs?",
 				required: false,
+				initialValues: packs,
 				options: packs.map((pack) => ({
 					label: pack.label,
 					value: pack,
@@ -137,27 +140,31 @@ const data = await p.group(
 						defaultValue: results.title,
 					})
 				: Promise.resolve(),
-		enabledAddons: () =>
-			addons.length > 0
-				? p.multiselect({
-						message: "Enable addons?",
-						required: false,
-						options: addons.map((addon) => ({
-							label: `${addon.name} - ${addon.description}`,
-							value: addon.id,
-						})),
-					})
-				: Promise.resolve([]),
+		enabledAddons: () => {
+			if (addons.length > 0) {
+				return p.multiselect({
+					message: "Enable addons?",
+					required: false,
+					// initialValues: addons.filter(x => x.default).map(x => x.id),
+					options: addons.map((addon) => ({
+						label: `${addon.name} - ${addon.description}`,
+						value: addon.id,
+					})),
+				})
+			}
+			else {
+				return Promise.resolve([])
+			}
+		},
 	},
 	{ onCancel: () => process.exit(0) },
 );
 
-function hasPackageJSON(path: string = data.id) {
-	try {
-		return existsSync(`${path}/package.json`);
-	} catch {
-		return false;
-	}
+// Resolve module path relative to cwd
+const modulePath = resolve(process.cwd(), data.id);
+
+function hasPackageJSON(): boolean {
+	return existsSync(join(modulePath, "package.json"));
 }
 
 await p.tasks([
@@ -165,15 +172,15 @@ await p.tasks([
 		title: "[Task] Deleting existing directory",
 		enabled: deleteFolder,
 		task: async () => {
-			if (deleteFolder) rmSync(data.id, { recursive: true });
+			if (deleteFolder) rmSync(modulePath, { recursive: true });
 			return "✅ Existing directory deleted";
 		},
 	},
 	{
 		title: "[Task] Making directory",
 		task: async () => {
-			await mkdir(data.id, { recursive: true });
-			return `✅ ${data.id} directory created`;
+			await mkdir(modulePath, { recursive: true });
+			return `✅ ${modulePath} directory created`;
 		},
 	},
 	{
@@ -181,7 +188,7 @@ await p.tasks([
 		task: async () => {
 			await cp(
 				new URL(`../templates/${data.template}`, import.meta.url),
-				data.id,
+				modulePath,
 				{
 					recursive: true,
 				},
@@ -192,7 +199,7 @@ await p.tasks([
 	{
 		title: "[Task] Writing module.json",
 		task: async () => {
-			const modPath = `${data.id}/module.json`;
+			const modPath = join(modulePath, "module.json");
 			const mod = (await Bun.file(modPath).json()) as Record<string, any>;
 
 			// inject user data
@@ -202,7 +209,6 @@ await p.tasks([
 			mod.compatibility = {
 				minimum: data.version,
 				verified: data.version,
-				// maximum: data.version + 1,
 			};
 			mod.relationships.system = data.system.map((system) =>
 				systems.find((s) => s.id === system),
@@ -237,34 +243,31 @@ await p.tasks([
 	{
 		title: "[Task] Writing README.md",
 		task: async () => {
-			const readmePath = `${data.id}/README.md`;
+			const readmePath = join(modulePath, "README.md");
 			const readme = `# ${data.title}
-					${data.description}
+${data.description}
 
-					## Installation
+## Installation
 
-					\`\`\`
-					cd ${data.id} ${hasPackageJSON() ? "&& bun install": "and get to making stuff!"}
-					\`\`\`
+\`\`\`
+cd ${data.id} ${hasPackageJSON() ? "&& bun install" : "and get to making stuff!"}
+\`\`\`
 
-					## Resources
+## Resources
 
-					${
-						data.system.includes("dnd5e")
-							? `
-							D&D5e Wiki: https://github.com/foundryvtt/dnd5e/wiki
-							D&D5e Specific Module Flags: https://github.com/foundryvtt/dnd5e/wiki/Module-Registration`
-							: ""
-					}
+${
+	data.system.includes("dnd5e")
+		? `D&D5e Wiki: https://github.com/foundryvtt/dnd5e/wiki
+D&D5e Specific Module Flags: https://github.com/foundryvtt/dnd5e/wiki/Module-Registration`
+		: ""
+}
 
-					${
-						data.system.includes("pf2e")
-							? `
-							PF2e Wiki: https://github.com/foundryvtt/pf2e/wiki
-							`
-							: ""
-					}
-			`;
+${
+	data.system.includes("pf2e")
+		? `PF2e Wiki: https://github.com/foundryvtt/pf2e/wiki`
+		: ""
+}
+`;
 
 			await Bun.write(readmePath, readme);
 
@@ -278,12 +281,12 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 	for (const addonId of data.enabledAddons) {
 		p.note(`[Addon] Running ${addonId} setup...`);
 		const addonProcess = Bun.spawn(
-			["bun", "run", `addons/${addonId}/setup.ts`],
+			["bun", "run", packageDir(`../addons/${addonId}/setup.ts`)],
 			{
 				stdio: ["inherit", "inherit", "inherit"],
 				env: {
 					...process.env,
-					MODULE_DIR: data.id,
+					MODULE_DIR: modulePath,
 					ADDON_ID: addonId,
 				},
 			},
@@ -296,8 +299,8 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 	}
 }
 
-// Check if template has an scripts/onCreate, ask to run it
-const onCreatePath = `${data.id}/scripts/onCreate.ts`;
+// Check if template has a scripts/onCreate, ask to run it
+const onCreatePath = join(modulePath, "scripts", "onCreate.ts");
 if (await Bun.file(onCreatePath).exists()) {
 	const runOnCreate = await p.confirm({
 		message: `Run onCreate script?`,
@@ -307,7 +310,7 @@ if (await Bun.file(onCreatePath).exists()) {
 		const spin = p.spinner();
 		spin.start("[Task] Running onCreate script...");
 		const process = Bun.spawn(["bun", "run", "onCreate.ts"], {
-			cwd: `${data.id}/scripts`,
+			cwd: join(modulePath, "scripts"),
 		});
 		await process.exited;
 		if (process.exitCode !== 0) {
@@ -317,4 +320,4 @@ if (await Bun.file(onCreatePath).exists()) {
 	}
 }
 
-p.outro(`cd ${cyan(data.id)} ${hasPackageJSON() ? "&& bun install": "and get to making stuff!"}`);
+p.outro(`cd ${cyan(data.id)} ${hasPackageJSON() ? "&& bun install" : "and get to making stuff!"}`);
