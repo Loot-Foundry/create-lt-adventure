@@ -299,7 +299,7 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 }
 
 // Check if template has a scripts/onCreate, ask to run it
-const onCreatePath = join(modulePath, "scripts", "onCreate.ts");
+const onCreatePath = join(modulePath, "scripts", "onCreate.mjs");
 if (await Bun.file(onCreatePath).exists()) {
 	const runOnCreate = await p.confirm({
 		message: `Run onCreate script?`,
