@@ -9,7 +9,7 @@ A CLI scaffolding tool for creating Foundry VTT modules.
 Once published to npm, you can install this globally:
 
 ```bash
-bun install -g create-lt-adventure
+bun install -g https://github.com/Loot-Foundry/create-lt-adventure
 ```
 
 Then run it from anywhere:
