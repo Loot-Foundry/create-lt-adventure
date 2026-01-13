@@ -9,12 +9,6 @@ A CLI scaffolding tool for creating Foundry VTT modules.
 Once published to npm, you can install this globally:
 
 ```bash
-npm install -g create-fvtt-module
-```
-
-or
-
-```bash
 bun install -g create-fvtt-module
 ```
 
@@ -49,10 +43,10 @@ bun run build:watch
 
 ## Scripts
 
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm run build:watch` - Watch TypeScript files and rebuild on changes
-- `npm run dev` - Run the CLI in development mode (requires Bun)
-- `npm run prepublishOnly` - Automatically run before publishing
+- `bun run build` - Compile TypeScript to JavaScript
+- `bun run build:watch` - Watch TypeScript files and rebuild on changes
+- `bun run dev` - Run the CLI in development mode (requires Bun)
+- `bun run prepublishOnly` - Automatically run before publishing
 
 ## System Support
 
