@@ -101,10 +101,12 @@ await mkdir(workflowDir, { recursive: true });
 await Bun.write(`${workflowDir}/main.yml`, mainYml);
 
 let note = "✅ Installed!";
+note += "\nThe Github workflow is triggered by making a new release. To make a new release go to your repository's Releases page which can be found in the sidebar on the right and press \"Draft a new release.\" Fill in the version number and you're done!"
+
 if (data.features.includes("discord"))
 	note +=
-		"\nFor the Discord integration, make sure to create a DISCORD_WEBHOOK secret with the webhook url.";
+		"\n - For the Discord integration, make sure to create a DISCORD_WEBHOOK secret with the webhook url.";
 if (data.features.includes("ftp"))
-	note += `\nFor the FTP integration, make sure to include the FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD secrets.\n\tThe module JSON also can include a flag stating its subdirectory on the FTP server under ${cyan("flags.ftpPath")}.`;
+	note += `\n - For the FTP integration, make sure to include the FTP_SERVER, FTP_USERNAME, and FTP_PASSWORD secrets.\n\tThe module JSON also can include a flag stating its subdirectory on the FTP server under ${cyan("flags.ftpPath")}.`;
 
 p.note(note, "Github Workflow");
