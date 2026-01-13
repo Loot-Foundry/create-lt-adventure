@@ -1,5 +1,5 @@
 {
-	"name": "create-fvtt-module",
+	"name": "create-lt-module",
 	"version": "0.0.1",
 	"description": "A CLI tool to scaffold Foundry VTT modules",
 	"keywords": [
@@ -12,11 +12,11 @@
 	"author": "mrvauxs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/MrVauxs/create-fvtt-module"
+		"url": "https://github.com/MrVauxs/create-lt-module"
 	},
-	"homepage": "https://github.com/MrVauxs/create-fvtt-module#readme",
+	"homepage": "https://github.com/MrVauxs/create-lt-module#readme",
 	"bugs": {
-		"url": "https://github.com/MrVauxs/create-fvtt-module/issues"
+		"url": "https://github.com/MrVauxs/create-lt-module/issues"
 	},
 	"type": "module",
 	"main": "./dist/index.js",
