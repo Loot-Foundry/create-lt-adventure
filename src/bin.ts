@@ -308,7 +308,7 @@ if (await Bun.file(onCreatePath).exists()) {
 	if (runOnCreate) {
 		const spin = p.spinner();
 		spin.start("[Task] Running onCreate script...");
-		const process = Bun.spawn(["bun", "run", "onCreate.ts"], {
+		const process = Bun.spawn(["bun", "run", "onCreate.mjs"], {
 			cwd: join(modulePath, "scripts"),
 		});
 		await process.exited;

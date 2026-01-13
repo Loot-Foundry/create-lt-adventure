@@ -1,6 +1,6 @@
 {
 	"name": "create-lt-adventure",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "A CLI tool to scaffold Foundry VTT modules",
 	"keywords": [
 		"foundry-vtt",
