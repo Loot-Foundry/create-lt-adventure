@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import * as p from "@clack/prompts";
 import { cyan } from "kolorist";
 import { mkdir, cp } from "fs/promises";
