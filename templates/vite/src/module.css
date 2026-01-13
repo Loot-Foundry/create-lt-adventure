@@ -1,3 +1,25 @@
+:root {
+  --((moduleId))-checks-color: #074e4b;
+}
+
+body.theme-light .((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: var(--lt-checks-color);
+}
+
+body.theme-dark .((moduleId)).Checks-and-Saves {
+  color: var(--lt-checks-color);
+}
+
+.themed.theme-dark .((moduleId)).Checks-and-Saves {
+  color: var(--lt-checks-color);
+}
+
+.themed.theme-light .((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: var(--lt-checks-color);
+}
+
 .((moduleId))-journal .journal-entry-content .sidebar,
 .editor-content .((moduleId)).sidebar {
   /* font-family: "Candara"; */
@@ -188,24 +210,6 @@
       margin-inline: 16px;
     }
   }
-}
-
-body.theme-light .((moduleId)).Checks-and-Saves {
-  font-weight: bold;
-  color: #074e4b;
-}
-
-body.theme-dark .((moduleId)).Checks-and-Saves {
-  color: hsl(69 58 47);
-}
-
-.themed.theme-dark .((moduleId)).Checks-and-Saves {
-  color: hsl(69 58 47);
-}
-
-.themed.theme-light .((moduleId)).Checks-and-Saves {
-  font-weight: bold;
-  color: #074e4b;
 }
 
 .((moduleId))-journal.application {
