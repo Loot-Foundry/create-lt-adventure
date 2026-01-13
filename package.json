@@ -41,6 +41,7 @@
 		"README.md"
 	],
 	"scripts": {
+		"create": "bun src/bin.ts",
 		"build": "tsc",
 		"build:watch": "tsc --watch",
 		"prepublishOnly": "npm run build",
