@@ -2,8 +2,8 @@
 import * as p from "@clack/prompts";
 import { cyan } from "kolorist";
 import { mkdir, cp } from "fs/promises";
-import { packs, systems } from "./options";
-import { existsSync, readdirSync, rmSync } from "fs";
+import { packs, systems } from "./options.js";
+import { existsSync, readdirSync, rmSync, statSync } from "fs";
 
 p.intro(`Creating a new Foundry VTT module...`);
 
@@ -15,7 +15,7 @@ const autoId = cliArgs.includes("--auto-id");
 const templates = readdirSync("./templates");
 // Grab addons from addons/dirs
 const addonDirs = readdirSync("./addons").filter((item) => {
-	const stat = require("fs").statSync(`./addons/${item}`);
+	const stat = statSync(`./addons/${item}`);
 	return stat.isDirectory();
 });
 
