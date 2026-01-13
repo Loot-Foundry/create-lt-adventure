@@ -124,21 +124,12 @@ const data = await p.group(
 					value: pack,
 				})),
 			}),
-		containPacks: ({ results }: any) =>
-			results.packs?.length > 0
-				? p.confirm({
-						message: "Put Packs in a Folder?",
-						initialValue: true,
-					})
-				: Promise.resolve(false),
 		containPacksFolder: ({ results }: any) =>
-			results.containPacks
-				? p.text({
-						message: "Folder Name?",
-						placeholder: results.title,
-						defaultValue: results.title,
-					})
-				: Promise.resolve(),
+			p.text({
+				message: "Folder Name?",
+				placeholder: results.title,
+				defaultValue: results.title,
+			}),
 		enabledAddons: () => {
 			if (addons.length > 0) {
 				return p.multiselect({
@@ -215,16 +206,21 @@ await p.tasks([
 			mod.packs = data.packs.flatMap((pack) =>
 				data.system.map((system) => ({ ...pack, system })),
 			);
-			if (data.containPacks) {
-				mod.packFolders = [
-					{
-						name: data.containPacksFolder,
-						sorting: "m",
-						color: "#00000f",
-						packs: data.packs.map((x) => x.name),
-					},
-				];
-			}
+			mod.packFolders = [
+				{
+					name: "Loot Tavern",
+					sorting: "m",
+					color: "#00000f",
+					folders: [
+						{
+							name: data.containPacksFolder,
+							sorting: "m",
+							color: "#00000f",
+							packs: data.packs.map((x) => x.name),
+						}
+					]
+				},
+			];
 			if (data.system.includes("dnd5e")) {
 				mod.flags.dnd5e = {
 					sourceBooks: {
