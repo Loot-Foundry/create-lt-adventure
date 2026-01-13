@@ -6,10 +6,10 @@ A CLI scaffolding tool for creating Foundry VTT modules.
 
 ### Global Installation (for end users)
 
-Once published to npm, you can install this globally:
+Once published to npm, you can run the script via Bun:
 
 ```bash
-bun install -g create-lt-adventure
+bunx create-lt-adventure
 ```
 
 Then run it from anywhere:
