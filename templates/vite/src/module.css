@@ -1,23 +1,26 @@
 :root {
-  --((moduleId))-checks-color: #074e4b;
+  --((moduleId))-checks-color-light: #074e4b;
+  --((moduleId))-checks-color-dark: hsl(69 58 47);
 }
 
 body.theme-light .((moduleId)).Checks-and-Saves {
   font-weight: bold;
-  color: var(--((moduleId))-checks-color);
+  color: var(--((moduleId))-checks-color-light);
 }
 
 body.theme-dark .((moduleId)).Checks-and-Saves {
-  color: var(--((moduleId))-checks-color);
+  font-weight: bold;
+  color: var(--((moduleId))-checks-color-dark);
 }
 
 .themed.theme-dark .((moduleId)).Checks-and-Saves {
-  color: var(--((moduleId))-checks-color);
+  font-weight: bold;
+  color: var(--((moduleId))-checks-color-dark);
 }
 
 .themed.theme-light .((moduleId)).Checks-and-Saves {
   font-weight: bold;
-  color: var(--((moduleId))-checks-color);
+  color: var(--((moduleId))-checks-color-light);
 }
 
 .((moduleId))-journal .journal-entry-content .sidebar,
