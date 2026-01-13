@@ -4,20 +4,20 @@
 
 body.theme-light .((moduleId)).Checks-and-Saves {
   font-weight: bold;
-  color: var(--lt-checks-color);
+  color: var(--((moduleId))-checks-color);
 }
 
 body.theme-dark .((moduleId)).Checks-and-Saves {
-  color: var(--lt-checks-color);
+  color: var(--((moduleId))-checks-color);
 }
 
 .themed.theme-dark .((moduleId)).Checks-and-Saves {
-  color: var(--lt-checks-color);
+  color: var(--((moduleId))-checks-color);
 }
 
 .themed.theme-light .((moduleId)).Checks-and-Saves {
   font-weight: bold;
-  color: var(--lt-checks-color);
+  color: var(--((moduleId))-checks-color);
 }
 
 .((moduleId))-journal .journal-entry-content .sidebar,
