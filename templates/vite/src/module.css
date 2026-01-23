@@ -56,6 +56,11 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
   & h3,
   & h4 {
     color: hsl(179, 100%, 10%);
+    .theme-light &,
+    .themed.theme-light & {
+      color: hsl(179, 100%, 10%);
+    }
+    .theme-dark &,
     .themed.theme-dark & {
       color: hsl(120, 25%, 90%);
     }
