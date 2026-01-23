@@ -9,13 +9,19 @@ A CLI scaffolding tool for creating Foundry VTT modules.
 Once published to npm, you can run the script via Bun:
 
 ```bash
-bunx create-lt-adventure
+bunx create-lt-adventure 
 ```
 
 Then run it from anywhere:
 
 ```bash
 create-lt-adventure
+```
+
+Update the package using
+
+```bash
+bun update create-lt-adventure -g --latest
 ```
 
 ### Development Installation
