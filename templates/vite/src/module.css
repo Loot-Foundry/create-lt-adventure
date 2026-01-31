@@ -78,10 +78,10 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
   border-image-width: 20px 26px 20px 26px;
   border-image-outset: 19px 0px 19px 0px;
   border-image-repeat: round round;
-  border-image-source: url("modules/((moduleId))/assets/journals/Sidebar_Frame_Green.webp");
+  border-image-source: url("/modules/((moduleId))/assets/journals/Sidebar_Frame_Green.webp");
 
   &.brown {
-    border-image-source: url("modules/((moduleId))/assets/journals/Sidebar_Frame_Brown.webp");
+    border-image-source: url("/modules/((moduleId))/assets/journals/Sidebar_Frame_Brown.webp");
   }
 }
 
@@ -108,7 +108,7 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
     border-image-width: 12px 12px 12px 12px;
     border-image-outset: 6px 6px 6px 6px;
     border-image-repeat: stretch stretch;
-    border-image-source: url("modules/((moduleId))/assets/journals/Read-Aloud_Corner.webp");
+    border-image-source: url("/modules/((moduleId))/assets/journals/Read-Aloud_Corner.webp");
 
     .themed.theme-dark & {
       background: hsl(25, 30%, 75%, 15%);
@@ -152,12 +152,17 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
   .mask {
     --mask-size: 40%;
     border: none;
-    mask-image: url("modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
+    mask-image:
+      url("/modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
       linear-gradient(white 0 0);
     mask-composite: add;
     mask-mode: luminance;
-    mask-position: top right, bottom;
-    mask-size: 101% var(--mask-size), 101% calc(101% - var(--mask-size));
+    mask-position:
+      top right,
+      bottom;
+    mask-size:
+      101% var(--mask-size),
+      101% calc(101% - var(--mask-size));
     mask-repeat: no-repeat;
 
     &.upside-down {
@@ -195,12 +200,15 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
       background: rgba(0, 0, 0, 66%);
 
       border: none;
-      mask-image: url("modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
-        url("modules/((moduleId))/assets/journals/masks/flipped/mask-soft-04.webp");
+      mask-image:
+        url("/modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
+        url("/modules/((moduleId))/assets/journals/masks/flipped/mask-soft-04.webp");
       mask-composite: add;
       mask-mode: luminance;
       mask-position: top, bottom;
-      mask-size: 100% 51%, 100% 50%;
+      mask-size:
+        100% 51%,
+        100% 50%;
       mask-repeat: no-repeat;
     }
 
@@ -241,7 +249,7 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
       height: calc(100% + var(--ltBorderSizeMod, 0px));
       border-image: var(
           --urlBorderImage,
-          url("modules/((moduleId))/assets/journals/borders/panel-border-026.webp")
+          url("/modules/((moduleId))/assets/journals/borders/panel-border-026.webp")
         )
         var(--ltBorderCut) var(--ltBorderCut) var(--ltBorderCut)
         var(--ltBorderCut) fill / calc(1px * var(--ltBorderOutset))
@@ -282,13 +290,16 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
       background-size: cover;
 
       --mask-size: 10%;
-      mask-image: url("modules/((moduleId))/assets/journals/masks/mask-hard-06.webp"),
+      mask-image:
+        url("/modules/((moduleId))/assets/journals/masks/mask-hard-06.webp"),
         linear-gradient(white 0 0),
-        url("modules/((moduleId))/assets/journals/masks/flipped/mask-soft-04.webp");
+        url("/modules/((moduleId))/assets/journals/masks/flipped/mask-soft-04.webp");
       mask-composite: add;
       mask-mode: luminance;
       mask-position: top, center, bottom;
-      mask-size: 101% var(--mask-size), 100% calc(100% - 2 * var(--mask-size)),
+      mask-size:
+        101% var(--mask-size),
+        100% calc(100% - 2 * var(--mask-size)),
         101% var(--mask-size);
       mask-repeat: no-repeat;
     }

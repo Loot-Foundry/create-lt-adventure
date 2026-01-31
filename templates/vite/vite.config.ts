@@ -1,12 +1,12 @@
 import type { Plugin, UserConfig } from "vite";
+import fs from "node:fs";
 import path from "node:path";
-import fs from 'node:fs';
 import vttSync from "foundryvtt-sync";
-import { defineConfig } from "vite";
-import moduleJSON from "./module.json" with { type: "json" };
 import postcssPresetEnv from "postcss-preset-env";
 import PostCSSReplace from "postcss-replace";
-import 'dotenv/config'
+import { defineConfig } from "vite";
+import moduleJSON from "./module.json" with { type: "json" };
+import "dotenv/config";
 
 const target = "es2022"; // Build target for the vinal bundle.
 const foundryPort = Number(process.env.FOUNDRY_PORT || 30000); // Which port your FoundryVTT instance is hosted at.
@@ -31,9 +31,9 @@ const postcss = {
 
 const PACKAGE_ID = `modules/${moduleJSON.id}`;
 
-console.log(`Running foundry port ${foundryPort} -> dev port ${devPort}`)
 
 export default defineConfig(({ mode: _mode }) => {
+	if (_mode === "serve") console.log(`Running foundry port ${foundryPort} -> dev port ${devPort}`);
 	return {
 		root: "src/", // Source location / esbuild root.
 		base: `/${PACKAGE_ID}/dist`, // Base module path.
@@ -78,7 +78,7 @@ export default defineConfig(({ mode: _mode }) => {
 			sourcemap: true, // Provide a publicly available sourcemap for debuggin purposes.
 			target,
 			lib: {
-				entry: "./" + libEntry,
+				entry: `./${libEntry}`,
 				formats: ["es"],
 				fileName: moduleJSON.id,
 			},
@@ -94,15 +94,30 @@ export default defineConfig(({ mode: _mode }) => {
 		plugins: [
 			vttSync(moduleJSON, {}) as Plugin[], // Build the database from JSON files on build
 			{
-				name: 'create-dist-files', // Create dummy files for Foundry's tests to pass
-				apply: 'serve',
+				name: "create-dist-files", // Create dummy files for Foundry's tests to pass
+				apply: "serve",
 				buildStart() {
-					if (!fs.existsSync('dist')) fs.mkdirSync('dist');
+					if (!fs.existsSync("dist")) fs.mkdirSync("dist");
 
 					const files = [...moduleJSON.esmodules, ...moduleJSON.styles];
 					for (const name of files) {
-						fs.writeFileSync(name, '', { flag: 'a' });
+						fs.writeFileSync(name, "", { flag: "a" });
 					}
+				},
+			},
+			{
+				name: 'empty-css-proxy', // Create dummy CSS responses for Foundry requests
+				apply: 'serve',
+				configureServer(server) {
+					server.middlewares.use((req, res, next) => {
+					const cssPath = `/${PACKAGE_ID}/dist/${moduleJSON.id}.css`;
+					if (req.url === cssPath) {
+						res.setHeader('Content-Type', 'text/css');
+						res.end('');
+						return;
+					}
+					next();
+					});
 				},
 			},
 		],

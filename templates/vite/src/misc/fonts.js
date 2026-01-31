@@ -34,14 +34,12 @@ CONFIG.fontDefinitions["Kings Caslon"] = {
 CONFIG.fontDefinitions["Modesto"] = {
 	editor: true,
 	fonts: [
-		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_Regular.otf`] },
-		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_Bold.otf`], weight: 700 },
 		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_Light.otf`], weight: 300 },
-		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_Italic.otf`], style: "italic" },
-		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_LightItalic.otf`], style: "italic", weight: 300 },
-		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_MediumItalic.otf`], style: "italic", weight: 500 },
 		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_Medium.otf`], weight: 500 },
-		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_BoldItalic.otf`], style: "italic", weight: 700 }
+		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_Bold.otf`], weight: 700 },
+		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_LightItalic.otf`], style: "italic", weight: 300 },
+		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_BoldItalic.otf`], style: "italic", weight: 700 },
+		{ urls: [`modules/${id}/assets/journals/fonts/Modesto/ModestoText_MediumItalic.otf`], style: "italic", weight: 500 },
 	]
 };
 
