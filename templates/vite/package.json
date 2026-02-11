@@ -18,6 +18,7 @@
 		"foundryvtt-sync": "https://github.com/MrVauxs/FoundryVTT-Sync",
 		"kolorist": "^1.8.0",
 		"postcss-preset-env": "^10.6.0",
+		"terser": "^5.46.0",
 		"postcss-replace": "^2.0.1",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.0"
