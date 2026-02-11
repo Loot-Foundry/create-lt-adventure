@@ -55,13 +55,12 @@ body.theme-dark .((moduleId)).Checks-and-Saves {
   & h2,
   & h3,
   & h4 {
-    color: hsl(179, 100%, 10%);
-    .theme-light &,
-    .themed.theme-light & {
+    .themed.theme-light &,
+    body.theme-light & {
       color: hsl(179, 100%, 10%);
     }
-    .theme-dark &,
-    .themed.theme-dark & {
+    .themed.theme-dark &,
+    body.theme-dark & {
       color: hsl(120, 25%, 90%);
     }
     font-family: "Modesto Condensed";
