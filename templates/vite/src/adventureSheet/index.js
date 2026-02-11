@@ -454,7 +454,7 @@ export class LootTavernSheet extends DnDSheet {
 
 function registerSheet(sheet) {
 	foundry.applications.apps.DocumentSheetConfig.registerSheet(JournalEntry, moduleJSON.id, sheet, {
-		label: `${moduleJSON.title} Sheet`,
+		label: `LT - ${moduleJSON.title} Sheet`,
 		canBeDefault: false,
 	});
 }
