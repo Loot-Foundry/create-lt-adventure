@@ -10,16 +10,16 @@
 		"symlink": "node scripts/symlink.mjs"
 	},
 	"devDependencies": {
+		"@7h3laughingman/foundry-types": "^13.351.2",
 		"@clack/prompts": "^1.0.0-alpha.9",
 		"@foundryvtt/foundryvtt-cli": "^3.0.2",
 		"@types/jquery": "^3.5.33",
 		"dotenv": "^17.2.3",
-		"foundry-pf2e": "github:7H3LaughingMan/foundry-pf2e",
 		"foundryvtt-sync": "https://github.com/MrVauxs/FoundryVTT-Sync",
 		"kolorist": "^1.8.0",
 		"postcss-preset-env": "^10.6.0",
-		"terser": "^5.46.0",
 		"postcss-replace": "^2.0.1",
+		"terser": "^5.46.0",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.0"
 	},
