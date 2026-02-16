@@ -10,7 +10,7 @@ Hooks.on("getProseMirrorMenuDropDowns", (menu, dropdowns) => {
 			title,
 			children: [
 				{
-					action: "green-check",
+					action: `${id}-green-check`,
 					class: `${id} Checks-and-Saves`,
 					title: "Checks and Saves",
 					mark: menu.schema.marks.span,
@@ -21,7 +21,7 @@ Hooks.on("getProseMirrorMenuDropDowns", (menu, dropdowns) => {
 					}),
 				},
 				{
-					action: "sidebar",
+					action: `${id}-sidebar`,
 					class: "sidebar",
 					title: "Sidebar",
 					node: menu.schema.nodes.section,
