@@ -64,9 +64,13 @@ export default defineConfig(({ mode: _mode }) => {
 		},
 		build: {
 			outDir: "../dist", // The output directory.
-			emptyOutDir: false,
+			emptyOutDir: true,
 			sourcemap: true, // Provide a publicly available sourcemap for debuggin purposes.
 			target,
+			minify: "terser",
+			terserOptions: {
+				keep_classnames: true, // Don't mangle class names since Foundry relies on them
+			},
 			lib: {
 				entry: "./" + libEntry,
 				formats: ["es"],
