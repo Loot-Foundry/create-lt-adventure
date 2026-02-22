@@ -35,7 +35,7 @@ await p.tasks(
 				path.resolve(packsCompiled, pack),
 				`${jsonDataDir}/${pack}`,
 				{
-					expandAdventures: true,
+					expandAdventures: true, // If false, remove ignoreAdventureHMR in vite.config
 					omitVolatile: true,
 					folders: true,
 					clean: true,

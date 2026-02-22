@@ -9,7 +9,7 @@
         "@clack/prompts": "^1.0.0-alpha.9",
         "@foundryvtt/foundryvtt-cli": "^3.0.2",
         "dotenv": "^17.2.3",
-        "foundryvtt-sync": "https://github.com/MrVauxs/FoundryVTT-Sync",
+        "foundryvtt-sync": "^2.1.8",
         "kolorist": "^1.8.0",
         "postcss-preset-env": "^10.6.0",
         "terser": "^5.46.0",
@@ -203,6 +203,8 @@
     "@foundryvtt/foundryvtt-cli": ["@foundryvtt/foundryvtt-cli@3.0.2", "", { "dependencies": { "chalk": "^5.4.1", "classic-level": "^1.4.1", "esm": "^3.2.25", "js-yaml": "^4.1.0", "mkdirp": "^3.0.1", "nedb-promises": "^6.2.3", "yargs": "^17.7.2" }, "bin": { "fvtt": "fvtt.mjs" } }, "sha512-coh4Cf4FD/GHxk2QMsd+3wLMivNeih4rfkbZy8CaYjdlpo6iciFQwxLqznZWtn+5p06zekvS2xLUF55NnbXQDw=="],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
+
+    "@jridgewell/remapping": ["@jridgewell/remapping@2.3.5", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ=="],
 
     "@jridgewell/resolve-uri": ["@jridgewell/resolve-uri@3.1.2", "", {}, "sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw=="],
 
@@ -488,7 +490,7 @@
 
     "for-each": ["for-each@0.3.5", "", { "dependencies": { "is-callable": "^1.2.7" } }, "sha512-dKx12eRCVIzqCxFGplyFKJMPvLEWgmNtUrpTiJIR5u97zEhRG8ySrtboPHZXx7daLxQVrl643cTzbab2tkQjxg=="],
 
-    "foundryvtt-sync": ["foundryvtt-sync@github:MrVauxs/FoundryVTT-Sync#cc73d5c", { "dependencies": { "@foundryvtt/foundryvtt-cli": "^1.0.4", "chalk": "^5.4.1" } }, "MrVauxs-FoundryVTT-Sync-cc73d5c"],
+    "foundryvtt-sync": ["foundryvtt-sync@2.1.8", "", { "dependencies": { "@foundryvtt/foundryvtt-cli": "^3.0.3", "chalk": "^5.6.2", "unplugin": "^3.0.0" }, "peerDependencies": { "esbuild": ">=0.17", "rollup": ">=3", "vite": ">=4", "webpack": ">=5" }, "optionalPeers": ["esbuild", "rollup", "vite", "webpack"] }, "sha512-i4VrzAr8a+4Au3p4WgFD7lohm+lC3Eup+JdFUzYo0nm1gg4MimFiNyasv1oUkcI1RoYPBaQfw6W2Mn0UA/RWnA=="],
 
     "fraction.js": ["fraction.js@5.3.4", "", {}, "sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ=="],
 
@@ -754,6 +756,8 @@
 
     "undici-types": ["undici-types@7.18.2", "", {}, "sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w=="],
 
+    "unplugin": ["unplugin@3.0.0", "", { "dependencies": { "@jridgewell/remapping": "^2.3.5", "picomatch": "^4.0.3", "webpack-virtual-modules": "^0.6.2" } }, "sha512-0Mqk3AT2TZCXWKdcoaufeXNukv2mTrEZExeXlHIOZXdqYoHHr4n51pymnwV8x2BOVxwXbK2HLlI7usrqMpycdg=="],
+
     "update-browserslist-db": ["update-browserslist-db@1.2.3", "", { "dependencies": { "escalade": "^3.2.0", "picocolors": "^1.1.1" }, "peerDependencies": { "browserslist": ">= 4.21.0" }, "bin": { "update-browserslist-db": "cli.js" } }, "sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w=="],
 
     "url": ["url@0.11.4", "", { "dependencies": { "punycode": "^1.4.1", "qs": "^6.12.3" } }, "sha512-oCwdVC7mTuWiPyjLUz/COz5TLk6wgp0RCsN+wHZ2Ekneac9w8uuV0njcbbie2ME+Vs+d6duwmYuR3HgQXs1fOg=="],
@@ -767,6 +771,8 @@
     "vite": ["vite@7.3.0", "", { "dependencies": { "esbuild": "^0.27.0", "fdir": "^6.5.0", "picomatch": "^4.0.3", "postcss": "^8.5.6", "rollup": "^4.43.0", "tinyglobby": "^0.2.15" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^20.19.0 || >=22.12.0", "jiti": ">=1.21.0", "less": "^4.0.0", "lightningcss": "^1.21.0", "sass": "^1.70.0", "sass-embedded": "^1.70.0", "stylus": ">=0.54.8", "sugarss": "^5.0.0", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "jiti", "less", "lightningcss", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-dZwN5L1VlUBewiP6H9s2+B3e3Jg96D0vzN+Ry73sOefebhYr9f94wwkMNN/9ouoU8pV1BqA1d1zGk8928cx0rg=="],
 
     "w3c-keyname": ["w3c-keyname@2.2.8", "", {}, "sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ=="],
+
+    "webpack-virtual-modules": ["webpack-virtual-modules@0.6.2", "", {}, "sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ=="],
 
     "which-typed-array": ["which-typed-array@1.1.19", "", { "dependencies": { "available-typed-arrays": "^1.0.7", "call-bind": "^1.0.8", "call-bound": "^1.0.4", "for-each": "^0.3.5", "get-proto": "^1.0.1", "gopd": "^1.2.0", "has-tostringtag": "^1.0.2" } }, "sha512-rEvr90Bck4WZt9HHFC4DJMsjvu7x+r6bImz0/BrbWb7A2djJ8hnZMrWnHo9F8ssv0OMErasDhftrfROTyqSDrw=="],
 
@@ -784,7 +790,7 @@
 
     "yargs-parser": ["yargs-parser@21.1.1", "", {}, "sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw=="],
 
-    "foundryvtt-sync/@foundryvtt/foundryvtt-cli": ["@foundryvtt/foundryvtt-cli@1.1.0", "", { "dependencies": { "chalk": "^5.4.1", "classic-level": "^1.4.1", "esm": "^3.2.25", "js-yaml": "^4.1.0", "mkdirp": "^3.0.1", "nedb-promises": "^6.2.3", "yargs": "^17.7.2" }, "bin": { "fvtt": "fvtt.mjs" } }, "sha512-ergKZDUSgQ79168r38ORyN4v/UTliA40rxElaUh5iS27Qw9H8Ep/ll8j3/HfiikO3XUDwYxZLfDJfbcyj2i9TQ=="],
+    "foundryvtt-sync/@foundryvtt/foundryvtt-cli": ["@foundryvtt/foundryvtt-cli@3.0.3", "", { "dependencies": { "chalk": "^5.4.1", "classic-level": "^1.4.1", "esm": "^3.2.25", "js-yaml": "^4.1.0", "mkdirp": "^3.0.1", "nedb-promises": "^6.2.3", "yargs": "^17.7.2" }, "bin": { "fvtt": "fvtt.mjs" } }, "sha512-byNLOrZ9ev6PfW+gflhonT5Y+Goq2aHERwVGWO3eYRKez+lzZJoqMY/YMEi54XYozzWWn8d6LuRbBsVPJ30haw=="],
 
     "peggy/commander": ["commander@12.1.0", "", {}, "sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA=="],
 

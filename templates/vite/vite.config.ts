@@ -1,7 +1,7 @@
 import type { Plugin, UserConfig } from "vite";
 import path from "node:path";
 import fs from 'node:fs';
-import vttSync from "foundryvtt-sync";
+import vttSync from "foundryvtt-sync/vite";
 import { defineConfig } from "vite";
 import moduleJSON from "./module.json" with { type: "json" };
 import postcssPresetEnv from "postcss-preset-env";
@@ -86,7 +86,7 @@ export default defineConfig(({ mode: _mode }) => {
 		},
 
 		plugins: [
-			vttSync(moduleJSON, {}) as Plugin[], // Build the database from JSON files on build
+			vttSync(moduleJSON, { ignoreAdventureHMR: true }), // Build the database from JSON files on build
 			{
 				name: 'create-dist-files', // Create dummy files for Foundry's tests to pass
 				apply: 'serve',
