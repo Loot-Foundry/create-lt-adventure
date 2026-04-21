@@ -213,7 +213,12 @@ await p.tasks([
 				systems.find((s) => s.id === system),
 			);
 			mod.packs = data.packs.flatMap((pack) =>
-				data.system.map((system) => ({ ...pack, system })),
+				data.system.map((system) => ({
+					...pack,
+					system,
+					name: `${system}-${pack.name}`,
+					path: `${system}-${pack.path}`
+				})),
 			);
 			if (data.containPacks) {
 				mod.packFolders = [
