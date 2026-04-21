@@ -48,9 +48,9 @@
 		"dev": "bun src/bin.ts \"My New Module\" --auto-id"
 	},
 	"devDependencies": {
-		"@types/bun": "latest",
-		"@types/node": "^20",
 		"@clack/prompts": "^1.0.0-alpha.9",
+		"@types/bun": "latest",
+		"@types/node": "^20.19.39",
 		"kolorist": "^1.8.0",
 		"typescript": "^5"
 	},

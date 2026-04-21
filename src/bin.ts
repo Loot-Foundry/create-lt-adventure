@@ -4,8 +4,7 @@ import { cyan } from "kolorist";
 import { mkdir, cp } from "fs/promises";
 import { packs, systems } from "./options.js";
 import { existsSync, readdirSync, rmSync, statSync } from "fs";
-import { dirname, join, resolve } from "path";
-import { fileURLToPath } from "url";
+import { join, resolve } from "path";
 
 p.intro(`Creating a new Foundry VTT module...`);
 
@@ -158,7 +157,7 @@ const data = await p.group(
 		},
 	},
 	{ onCancel: () => process.exit(0) },
-);
+)
 
 // Resolve module path relative to cwd
 const modulePath = resolve(process.cwd(), data.id);
@@ -200,7 +199,7 @@ await p.tasks([
 		title: "[Task] Writing module.json",
 		task: async () => {
 			const modPath = join(modulePath, "module.json");
-			const mod = (await Bun.file(modPath).json()) as Record<string, any>;
+			const mod = (await Bun.file(modPath).json()) satisfies Record<string, any>;
 
 			// inject user data
 			mod.id = data.id;
@@ -222,16 +221,28 @@ await p.tasks([
 						name: data.containPacksFolder,
 						sorting: "m",
 						color: "#00000f",
-						packs: data.packs.map((x) => x.name),
+						packs: mod.packs.map((x: typeof packs[number]) => x.name),
 					},
 				];
 			}
 			if (data.system.includes("dnd5e")) {
 				mod.flags.dnd5e = {
 					sourceBooks: {
-						[data.id]: data.title,
+						[mod.id]: data.title,
 					},
 					spellLists: [],
+				};
+			}
+			// https://github.com/foundryvtt/pf2e/wiki/Creating-a-PF2e-Content-Module
+			if (data.system.includes("pf2e")) {
+				mod.flags[mod.id]['pf2e-homebrew'] = {
+					baseWeapons: {},
+					creatureTraits: {},
+					damageTypes: {},
+					equipmentTraits: {},
+					featTraits: {},
+					spellTraits: {},
+					weaponTraits: {}
 				};
 			}
 
