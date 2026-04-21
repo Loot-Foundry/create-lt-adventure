@@ -236,13 +236,20 @@ await p.tasks([
 			// https://github.com/foundryvtt/pf2e/wiki/Creating-a-PF2e-Content-Module
 			if (data.system.includes("pf2e")) {
 				mod.flags[mod.id]['pf2e-homebrew'] = {
-					baseWeapons: {},
+					classTraits: {},
 					creatureTraits: {},
 					damageTypes: {},
-					equipmentTraits: {},
 					featTraits: {},
+					languages: {},
+					magicSchools: {},
+					skills: {},
 					spellTraits: {},
-					weaponTraits: {}
+					weaponCategories: {},
+					weaponGroups: {},
+					baseWeapons: {},
+					weaponTraits: {},
+					equipmentTraits: {},
+					shieldTraits: {},
 				};
 			}
 
