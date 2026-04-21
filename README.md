@@ -12,7 +12,13 @@ Once published to npm, you can run the script via Bun:
 bunx create-fvtt-module
 ```
 
-Other package managers is untested. PRs to make the package compatible with them are welcome.
+Other package managers are untested. PRs to make the tool compatible with them are welcome.
+
+Updating the module:
+
+````bash
+bunx create-fvtt-module@latest
+```
 
 ### Development Installation
 

@@ -1,12 +1,15 @@
 #!/usr/bin/env bun
 import * as p from "@clack/prompts";
-import { cyan } from "kolorist";
+import { cyan, lightGreen, green } from "kolorist";
 import { mkdir, cp } from "fs/promises";
 import { packs, systems } from "./options.js";
 import { existsSync, readdirSync, rmSync, statSync } from "fs";
 import { join, resolve } from "path";
 
-p.intro(`Creating a new Foundry VTT module...`);
+const {default: pkg} = await import("../package.json", { with: { type: "json" } });
+
+p.intro(`${lightGreen(pkg.name)} v${pkg.version}`);
+p.log.step(`Creating a new Foundry VTT module...`);
 
 const packageDir = (d: string) => resolve(import.meta.dir, d);
 
