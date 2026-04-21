@@ -14,10 +14,10 @@ bunx create-fvtt-module
 
 Other package managers are untested. PRs to make the tool compatible with them are welcome.
 
-Updating the module:
+Updating the package:
 
-````bash
-bunx create-fvtt-module@latest
+```bash
+bun i create-fvtt-module@latest -g
 ```
 
 ### Development Installation
