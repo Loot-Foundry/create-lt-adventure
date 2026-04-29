@@ -243,6 +243,7 @@ await p.tasks([
 			}
 			// https://github.com/foundryvtt/pf2e/wiki/Creating-a-PF2e-Content-Module
 			if (data.system.includes("pf2e")) {
+				mod.flags[mod.id] ??= {};
 				mod.flags[mod.id]['pf2e-homebrew'] = {
 					classTraits: {},
 					creatureTraits: {},
