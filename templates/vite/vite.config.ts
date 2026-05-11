@@ -35,6 +35,7 @@ export default defineConfig(({ mode: _mode }) => {
 			alias: {
 				$lib: path.resolve(__dirname, "./src/lib"),
 				moduleJSON: path.resolve(__dirname, "./module.json"),
+				// Modify also the tsconfig.json file to include the alias
 			},
 		},
 
