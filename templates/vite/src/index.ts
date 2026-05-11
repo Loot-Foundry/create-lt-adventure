@@ -1,2 +1,2 @@
 import "./module.css";
-import moduleJSON from "moduleJSON";
+import "./hooks"
