@@ -1,7 +1,8 @@
 import moduleJSON from "moduleJSON";
+import { dev } from "$lib/utils";
 
 function ready() {
-	ui.notifications.info(`${moduleJSON.title} is ready!`);
+	if (dev) ui.notifications.info(`${moduleJSON.title} is ready!`);
 }
 
 const hooks = {

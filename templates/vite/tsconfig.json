@@ -24,7 +24,7 @@
 		"allowSyntheticDefaultImports": true,
         "types": ["@7h3laughingman/foundry-types", "jquery", "vite/client"],
 		"paths": {
-			"$lib": ["./src/lib"],
+			"$lib/*": ["./src/lib/*"],
 			"moduleJSON": ["./module.json"]
 		}
 	},
