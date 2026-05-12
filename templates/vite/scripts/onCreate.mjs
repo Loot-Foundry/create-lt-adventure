@@ -13,12 +13,21 @@ pack.name = mod.id;
 mod.media = [
 	{
 		"type": "setup",
-		"url": `modules/${mod.id}/assets/setup.webp`
+		"url": `modules/${mod.id}/assets/setup.webp`,
+		"thumbnail": `modules/${mod.id}/assets/setup.webp`
 	}
 ];
 
-await Bun.write("../module.json", JSON.stringify(mod, null, "\t"));
-await Bun.write("../package.json", JSON.stringify(pack, null, "\t"));
+const modString = JSON.stringify(mod, null, "\t")
+	// .replaceAll("AUTHOR", data.author)
+	.replaceAll("REPO", mod.id);
+
+const packString = JSON.stringify(pack, null, "\t")
+	// .replaceAll("AUTHOR", data.author)
+	.replaceAll("REPO", mod.id);
+
+await Bun.write("../module.json", modString);
+await Bun.write("../package.json", packString);
 
 // Rename gitignore to .gitignore
 renameSync("../gitignore", "../.gitignore");
