@@ -212,7 +212,7 @@ await p.tasks([
 				minimum: data.version,
 				verified: data.version,
 			};
-			mod.relationships.system = data.system.map((system) =>
+			mod.relationships.systems = data.system.map((system) =>
 				systems.find((s) => s.id === system),
 			);
 			mod.packs = data.packs.flatMap((pack) =>
