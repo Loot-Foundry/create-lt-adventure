@@ -1,8 +1,9 @@
 /**
- * Replacer function for JSON serialization.
- * @param {string} key - The key of the current property being processed.
- * @param {*} value - The value of the current property being processed.
- * @returns {*} The value to be included in the serialized JSON output.
+ * A replacer function or an array of property names in the object to include in the resulting string.
+ * https://github.com/foundryvtt/foundryvtt-cli
+ * @param {string} key
+ * @param {any} value
+ * @returns {any|Array<string|number>}
  */
 export function replacer(key, value) {
 	// Modify this to your liking.

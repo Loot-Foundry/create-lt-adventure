@@ -22,8 +22,8 @@ const postcss = {
 const PACKAGE_ID = `modules/${moduleJSON.id}`;
 
 
-export default defineConfig(({ mode: _mode }) => {
-	if (_mode.includes('dev')) console.log(`Running foundry port ${foundryPort} -> dev port ${devPort}`);
+export default defineConfig(({ command }) => {
+	if (command === 'serve') console.log(`Running foundry port ${foundryPort} -> dev port ${devPort}`);
 	return {
 		root: "src/", // Source location / esbuild root.
 		base: `/${PACKAGE_ID}/dist`, // Base module path.
@@ -66,7 +66,7 @@ export default defineConfig(({ mode: _mode }) => {
 		build: {
 			outDir: "../dist", // The output directory.
 			emptyOutDir: true,
-			sourcemap: true, // Provide a publicly available sourcemap for debuggin purposes.
+			sourcemap: true, // Provide a publicly available sourcemap for debugging purposes.
 			target,
 			minify: "terser",
 			terserOptions: {
