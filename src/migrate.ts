@@ -203,14 +203,9 @@ export async function migrateFrom(source: string, modulePath: string): Promise<v
 				const targetModuleJson = JSON.parse(content) as ModuleJson;
 
 				targetModuleJson.packs = newPacks;
-				targetModuleJson.packFolders = [
-					{
-						name: "Migrated Packs",
-						packs: newPackNames,
-						sorting: "m",
-						color: "#00000f",
-					},
-				];
+				if (sourceModuleJson.packFolders) {
+					targetModuleJson.packFolders = sourceModuleJson.packFolders;
+				}
 
 				await writeFile(targetModuleJsonPath, JSON.stringify(targetModuleJson, null, "\t"));
 				p.log.step("Updated module.json with migrated packs");
