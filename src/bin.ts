@@ -13,6 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
 import { packs, systems, foundryVersions } from "./options.js";
+import { migrateFrom } from "./migrate.js";
 
 const cliArgs = process.argv.slice(2);
 
@@ -23,6 +24,7 @@ const { values: flags, positionals } = parseArgs({
 		version: { type: "boolean", short: "v", default: false },
 		"auto-id": { type: "boolean", default: false },
 		template: { type: "string", default: "" },
+		"migrate-from": { type: "string", default: "" },
 	},
 	strict: false,
 	allowPositionals: true,
@@ -41,11 +43,14 @@ Options:
   --version, -v          Show version number
   --auto-id              Auto-generate module ID from title
   --template <name>      Specify template to use (e.g., vite, basic)
+  --migrate-from <path>  Migrate compendium packs from an existing module (filepath or URL to module.json)
 
 Examples:
   create-fvtt-module "My Module" --auto-id
   create-fvtt-module --template vite
-  create-fvtt-module "My Module" --auto-id --template vite`);
+  create-fvtt-module "My Module" --auto-id --template vite
+  create-fvtt-module "My Module" --migrate-from ./existing-module/module.json
+  create-fvtt-module "My Module" --migrate-from https://example.com/module.json`);
 	process.exit(0);
 }
 
@@ -57,6 +62,7 @@ if (flags.version) {
 const cliTitle: string | undefined = positionals[0] as string | undefined;
 const autoId = flags["auto-id"] as boolean;
 const templateFlag = flags.template as string;
+const migrateFromFlag = flags["migrate-from"] as string;
 
 const moduleIdRegex = /^[a-z0-9-]+$/;
 
@@ -88,9 +94,7 @@ p.log.step(`Creating a new Foundry VTT module...`);
 const packageDir = (d: string) => resolve(__dirname, d);
 
 let deleteFolder = false;
-// Grab available templates from dir
 const templates = readdirSync(packageDir("../templates"));
-// Grab addons from addons/dirs
 const addonDirs = readdirSync(packageDir("../addons")).filter((item) => {
 	const stat = statSync(packageDir(`../addons/${item}`));
 	return stat.isDirectory();
@@ -242,7 +246,6 @@ const data = await p.group(
 	{ onCancel: () => process.exit(1) },
 ) as Results;
 
-// Resolve module path relative to cwd
 const modulePath = resolve(process.cwd(), data.id);
 
 function hasPackageJSON(): boolean {
@@ -284,7 +287,6 @@ await p.tasks([
 			const modPath = join(modulePath, "module.json");
 			const mod = JSON.parse(await readFile(modPath, "utf8")) as Record<string, unknown>;
 
-			// inject user data
 			mod.id = data.id;
 			mod.title = data.title;
 			mod.description = data.description;
@@ -324,7 +326,6 @@ await p.tasks([
 					spellLists: [],
 				};
 			}
-			// https://github.com/foundryvtt/pf2e/wiki/Creating-a-PF2e-Content-Module
 			if (data.system.includes("pf2e")) {
 				(mod.flags as Record<string, unknown>) ??= {};
 				(mod.flags as Record<string, Record<string, unknown>>)[data.id] = {
@@ -406,7 +407,18 @@ await p.tasks([
 	},
 ]);
 
-// Run enabled addons
+if (migrateFromFlag) {
+	const spin = p.spinner();
+	spin.start(`Migrating packs from ${cyan(migrateFromFlag)}...`);
+	try {
+		await migrateFrom(migrateFromFlag, modulePath);
+		spin.stop("Migration completed successfully");
+	} catch (err) {
+		spin.stop(`Migration failed: ${err instanceof Error ? err.message : String(err)}`);
+		p.log.error(err instanceof Error ? err.message : String(err));
+	}
+}
+
 if (data.enabledAddons && data.enabledAddons.length > 0) {
 	for (const addonId of data.enabledAddons) {
 		p.note(`[Addon] Running ${addonId} setup...`);
@@ -443,7 +455,6 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 	}
 }
 
-// Check if template has a scripts/onCreate, ask to run it
 const onCreatePath = join(modulePath, "scripts", "onCreate.mjs");
 if (existsSync(onCreatePath)) {
 	const runOnCreate = await p.confirm({

@@ -49,7 +49,10 @@
 	},
 	"devDependencies": {
 		"@clack/prompts": "^1.0.0-alpha.9",
+		"@foundryvtt/foundryvtt-cli": "^1.0.0",
+		"@types/adm-zip": "^0.5.7",
 		"@types/node": "^20.19.39",
+		"adm-zip": "^0.5.16",
 		"kolorist": "^1.8.0",
 		"typescript": "^5"
 	},
