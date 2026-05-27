@@ -1,19 +1,29 @@
 import * as p from "@clack/prompts";
-import { mkdir, readdir, rm, readFile, writeFile, stat, copyFile } from "fs/promises";
-import { existsSync } from "fs";
+import { mkdir, readdir, rm, readFile, writeFile, stat, copyFile, cp } from "fs/promises";
+import { existsSync, readdirSync, statSync } from "fs";
 import { tmpdir } from "os";
-import { join, basename } from "path";
+import { join } from "path";
 import AdmZip from "adm-zip";
 import { extractPack } from "@foundryvtt/foundryvtt-cli";
 import { yellow, cyan } from "kolorist";
+
+interface PackEntry {
+	label: string;
+	name: string;
+	path: string;
+	system?: string;
+	type: string;
+	ownership?: Record<string, string>;
+	[key: string]: unknown;
+}
 
 interface ModuleJson {
 	id?: string;
 	title?: string;
 	description?: string;
 	download?: string;
-	packs?: Array<{ name: string; label: string; type: string; path: string; system?: string; ownership?: Record<string, string> }>;
-	packFolders?: Array<{ name: string; packs: string[]; sorting?: string; color?: string }>;
+	packs?: PackEntry[];
+	packFolders?: Array<{ name: string; packs: string[]; sorting?: string; color?: string; folders?: unknown[] }>;
 	[key: string]: unknown;
 }
 
@@ -22,43 +32,32 @@ function isUrl(input: string): boolean {
 }
 
 async function readModuleJson(source: string): Promise<ModuleJson> {
-	let jsonPath: string;
-
 	if (isUrl(source)) {
 		const spinner = p.spinner();
 		spinner.start(`Fetching module.json from ${cyan(source)}...`);
-		try {
-			const response = await fetch(source);
-			if (!response.ok) {
-				throw new Error(`Failed to fetch module.json: ${response.status} ${response.statusText}`);
-			}
-			const text = await response.text();
-			const parsed = JSON.parse(text) as ModuleJson;
-			spinner.stop(`module.json fetched successfully`);
-			return parsed;
-		} catch (err) {
-			spinner.stop(`Failed to fetch module.json: ${err instanceof Error ? err.message : String(err)}`);
-			throw err;
+		const response = await fetch(source);
+		if (!response.ok) {
+			throw new Error(`Failed to fetch module.json: ${response.status} ${response.statusText}`);
 		}
+		const text = await response.text();
+		const parsed = JSON.parse(text) as ModuleJson;
+		spinner.stop(`module.json fetched successfully`);
+		return parsed;
 	}
 
-	if (existsSync(source)) {
-		const sourceStat = await stat(source);
-		if (sourceStat.isDirectory()) {
-			jsonPath = join(source, "module.json");
-		} else {
-			jsonPath = source;
-		}
-
-		if (!existsSync(jsonPath)) {
-			throw new Error(`module.json not found at ${source}`);
-		}
-
-		const content = await readFile(jsonPath, "utf8");
-		return JSON.parse(content) as ModuleJson;
+	if (!existsSync(source)) {
+		throw new Error(`Path does not exist: ${source}`);
 	}
 
-	throw new Error(`Path does not exist: ${source}`);
+	const sourceStat = await stat(source);
+	const jsonPath = sourceStat.isDirectory() ? join(source, "module.json") : source;
+
+	if (!existsSync(jsonPath)) {
+		throw new Error(`module.json not found at ${source}`);
+	}
+
+	const content = await readFile(jsonPath, "utf8");
+	return JSON.parse(content) as ModuleJson;
 }
 
 async function downloadZipBuffer(url: string): Promise<Buffer> {
@@ -70,133 +69,132 @@ async function downloadZipBuffer(url: string): Promise<Buffer> {
 	return Buffer.from(await response.arrayBuffer());
 }
 
-async function findCompendiumFolders(extractDir: string): Promise<Array<{ folderPath: string; folderName: string }>> {
-	const result: Array<{ folderPath: string; folderName: string }> = [];
+function findModuleRoot(extractDir: string): string {
+	const entries = readdirSync(extractDir);
+	const moduleJsonCandidates = entries.filter((e) => e === "module.json");
+	if (moduleJsonCandidates.length > 0) {
+		return extractDir;
+	}
 
-	async function scanDirectory(dirPath: string): Promise<void> {
-		const entries = await readdir(dirPath, { withFileTypes: true });
-
-		for (const entry of entries) {
-			const fullPath = join(dirPath, entry.name);
-
-			if (entry.isDirectory()) {
-				if (entry.name === "packs" || entry.name === "data") {
-					const subEntries = await readdir(fullPath);
-					for (const subEntry of subEntries) {
-						const subPath = join(fullPath, subEntry);
-						const subStat = await stat(subPath);
-						if (subStat.isDirectory()) {
-							const dbFiles = (await readdir(subPath)).filter((f) => f.endsWith(".db"));
-							if (dbFiles.length > 0) {
-								result.push({ folderPath: subPath, folderName: subEntry });
-							}
-						}
-					}
-				} else {
-					await scanDirectory(fullPath);
+	for (const entry of entries) {
+		const entryPath = join(extractDir, entry);
+		try {
+			const entryStat = statSync(entryPath);
+			if (entryStat.isDirectory()) {
+				const subEntries = readdirSync(entryPath);
+				if (subEntries.includes("module.json")) {
+					return entryPath;
 				}
 			}
+		} catch {
+			// skip
 		}
 	}
 
-	await scanDirectory(extractDir);
-	return result;
+	return extractDir;
 }
 
-function simpleReplacer(_key: string, value: unknown): unknown {
-	return value;
+async function isLevelDBFolder(folderPath: string): Promise<boolean> {
+	if (!existsSync(folderPath)) return false;
+	const statResult = await stat(folderPath);
+	if (!statResult.isDirectory()) return false;
+	const entries = await readdir(folderPath);
+	const levelDBMarkers = ["CURRENT", "LOCK", "MANIFEST-000001", "MANIFEST-000002"];
+	return entries.some((e) => levelDBMarkers.some((m) => e === m || e.endsWith(".ldb") || e.endsWith(".log")));
 }
 
 export async function migrateFrom(source: string, modulePath: string): Promise<void> {
-	const moduleJson = await readModuleJson(source);
+	const sourceModuleJson = await readModuleJson(source);
 
-	if (!moduleJson.download) {
+	if (!sourceModuleJson.download) {
 		throw new Error("No download URL found in module.json. The source module does not have a download property.");
 	}
 
-	p.log.step(`Downloading module from ${cyan(moduleJson.download)}`);
+	if (!sourceModuleJson.packs || sourceModuleJson.packs.length === 0) {
+		p.log.warn("No packs found in the source module.json.");
+		return;
+	}
+
+	p.log.step(`Downloading module from ${cyan(sourceModuleJson.download)}`);
 
 	const tempDir = join(tmpdir(), `fvtt-migrate-${Date.now()}`);
 	const extractDir = join(tempDir, "extracted");
 
 	try {
 		await mkdir(tempDir, { recursive: true });
-		const zipBuffer = await downloadZipBuffer(moduleJson.download);
+		const zipBuffer = await downloadZipBuffer(sourceModuleJson.download);
 		const zip = new AdmZip(zipBuffer);
 		zip.extractAllTo(extractDir, true);
 
-		p.log.step("Finding compendium folders...");
-		const compendiumFolders = await findCompendiumFolders(extractDir);
+		const moduleRoot = findModuleRoot(extractDir);
+		p.log.step(`Found ${sourceModuleJson.packs.length} pack(s) in module.json: ${sourceModuleJson.packs.map((p) => p.name).join(", ")}`);
 
-		if (compendiumFolders.length === 0) {
-			p.log.warn("No compendium folders found in the source module.");
-			return;
-		}
+		const targetPacksDir = join(modulePath, "packs");
+		const targetDataDir = join(modulePath, "data");
+		await mkdir(targetPacksDir, { recursive: true });
+		await mkdir(targetDataDir, { recursive: true });
 
-		p.log.info(`Found ${compendiumFolders.length} compendium folder(s): ${compendiumFolders.map((f) => f.folderName).join(", ")}`);
+		const newPacks: PackEntry[] = [];
+		const newPackNames: string[] = [];
 
-	const sourcePackMap = new Map<string, string>();
-	if (moduleJson.packs) {
-		for (const pack of moduleJson.packs) {
-			const packName = basename(pack.path);
-			if (pack.type) {
-				sourcePackMap.set(packName, pack.type);
+		for (const pack of sourceModuleJson.packs) {
+			const sourcePackPath = join(moduleRoot, pack.path);
+			const dbFileName = `${pack.name}.db`;
+			const sourceDbFile = join(sourcePackPath, dbFileName);
+
+			let sourceInputPath: string | null = null;
+			let isFolder = false;
+
+			if (await isLevelDBFolder(sourcePackPath)) {
+				sourceInputPath = sourcePackPath;
+				isFolder = true;
+			} else if (existsSync(sourceDbFile)) {
+				sourceInputPath = sourceDbFile;
 			}
-		}
-	}
 
-	const targetPacksDir = join(modulePath, "packs");
-	const targetDataDir = join(modulePath, "data");
-	await mkdir(targetPacksDir, { recursive: true });
-	await mkdir(targetDataDir, { recursive: true });
+			if (!sourceInputPath) {
+				p.log.warn(`Pack not found at ${sourcePackPath} or ${sourceDbFile}. Skipping ${pack.name}.`);
+				continue;
+			}
 
-	const newPacks: Array<{ name: string; label: string; type: string; path: string; system: string; ownership: Record<string, string> }> = [];
-	const newPackNames: string[] = [];
+			p.log.step(`Extracting ${yellow(pack.name)}...`);
 
-	for (const compendium of compendiumFolders) {
-		const packEntries = await readdir(compendium.folderPath);
-		const dbFiles = packEntries.filter((f) => f.endsWith(".db"));
+			if (isFolder) {
+				await cp(sourceInputPath, join(targetPacksDir, pack.name), { recursive: true });
+			} else {
+				await copyFile(sourceInputPath, join(targetPacksDir, dbFileName));
+			}
 
-		for (const dbFile of dbFiles) {
-			const packName = basename(dbFile, ".db");
-			const packType = sourcePackMap.get(packName) || "JournalEntry";
-
-			await copyFile(join(compendium.folderPath, dbFile), join(targetPacksDir, dbFile));
-
-			p.log.step(`Extracting ${yellow(packName)}...`);
-
-			const targetDataPath = join(targetDataDir, packName);
+			const targetDataPath = join(targetDataDir, pack.name);
 			await mkdir(targetDataPath, { recursive: true });
+			const extractInput = isFolder ? join(targetPacksDir, pack.name) : join(targetPacksDir, dbFileName);
 			await extractPack(
-				join(targetPacksDir, dbFile),
+				extractInput,
 				targetDataPath,
 				{
 					expandAdventures: true,
 					omitVolatile: true,
 					folders: true,
 					clean: true,
-					log: false,
 					jsonOptions: {
-						replacer: simpleReplacer,
 						space: "\t",
 					},
 				},
 			);
 
 			newPacks.push({
-				name: packName,
-				label: packName.charAt(0).toUpperCase() + packName.slice(1).replace(/-/g, " "),
-				type: packType,
-				path: `packs/${packName}`,
-				system: "",
-				ownership: {
+				label: pack.label || pack.name.charAt(0).toUpperCase() + pack.name.slice(1).replace(/-/g, " "),
+				name: pack.name,
+				path: `packs/${pack.name}`,
+				system: pack.system || "",
+				type: pack.type,
+				ownership: pack.ownership || {
 					PLAYER: "OBSERVER",
 					ASSISTANT: "OBSERVER",
 				},
 			});
-			newPackNames.push(packName);
+			newPackNames.push(pack.name);
 		}
-	}
 
 		if (newPacks.length > 0) {
 			const targetModuleJsonPath = join(modulePath, "module.json");
@@ -219,7 +217,7 @@ export async function migrateFrom(source: string, modulePath: string): Promise<v
 			}
 		}
 
-		p.log.info(`Migration complete! ${compendiumFolders.length} compendium folder(s) processed.`);
+		p.log.info(`Migration complete! ${newPacks.length} pack(s) processed.`);
 	} finally {
 		await rm(tempDir, { recursive: true, force: true });
 	}
