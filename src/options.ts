@@ -69,4 +69,9 @@ const systems = [
 	},
 ];
 
-export { packs, systems };
+const foundryVersions = [
+	{ label: "V13", value: "13" },
+	{ label: "V14", value: "14" },
+];
+
+export { packs, systems, foundryVersions };

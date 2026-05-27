@@ -6,12 +6,81 @@ import { existsSync, readdirSync, rmSync, statSync } from "fs";
 import { join, resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
+import { parseArgs } from "util";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 
-import { packs, systems } from "./options.js";
+import { packs, systems, foundryVersions } from "./options.js";
+
+const cliArgs = process.argv.slice(2);
+
+const { values: flags, positionals } = parseArgs({
+	args: cliArgs,
+	options: {
+		help: { type: "boolean", short: "h", default: false },
+		version: { type: "boolean", short: "v", default: false },
+		"auto-id": { type: "boolean", default: false },
+		template: { type: "string", default: "" },
+	},
+	strict: false,
+	allowPositionals: true,
+});
+
+if (flags.help) {
+	console.log(`Usage: create-fvtt-module [title] [options]
+
+Scaffold a new Foundry VTT module.
+
+Arguments:
+  title                  Module title (optional, prompted if not provided)
+
+Options:
+  --help, -h             Show this help message
+  --version, -v          Show version number
+  --auto-id              Auto-generate module ID from title
+  --template <name>      Specify template to use (e.g., vite, basic)
+
+Examples:
+  create-fvtt-module "My Module" --auto-id
+  create-fvtt-module --template vite
+  create-fvtt-module "My Module" --auto-id --template vite`);
+	process.exit(0);
+}
+
+if (flags.version) {
+	console.log(pkg.version);
+	process.exit(0);
+}
+
+const cliTitle: string | undefined = positionals[0] as string | undefined;
+const autoId = flags["auto-id"] as boolean;
+const templateFlag = flags.template as string;
+
+const moduleIdRegex = /^[a-z0-9-]+$/;
+
+interface PackEntry {
+	label: string;
+	name: string;
+	path: string;
+	system: string;
+	type: string;
+	ownership: Record<string, string>;
+}
+
+interface Results {
+	template: string;
+	title: string;
+	id: string;
+	description: string;
+	version: string;
+	system: string[];
+	packs: PackEntry[];
+	containPacks: boolean;
+	containPacksFolder?: string;
+	enabledAddons: string[];
+}
 
 p.intro(`${lightGreen(pkg.name)} v${pkg.version}`);
 p.log.step(`Creating a new Foundry VTT module...`);
@@ -19,9 +88,6 @@ p.log.step(`Creating a new Foundry VTT module...`);
 const packageDir = (d: string) => resolve(__dirname, d);
 
 let deleteFolder = false;
-const cliArgs = process.argv.slice(2);
-const cliTitle = cliArgs[0];
-const autoId = cliArgs.includes("--auto-id");
 // Grab available templates from dir
 const templates = readdirSync(packageDir("../templates"));
 // Grab addons from addons/dirs
@@ -49,8 +115,11 @@ const addons: (Addon & { id: string })[] = await Promise.all(
 const data = await p.group(
 	{
 		template: async () => {
+			if (templateFlag && templates.includes(templateFlag)) {
+				return templateFlag;
+			}
 			if (templates.length === 1) {
-				return templates[0];
+				return templates[0]!;
 			}
 			const template = await p.select({
 				message: "Select a template",
@@ -59,47 +128,55 @@ const data = await p.group(
 					value: template,
 				})),
 			});
+			if (p.isCancel(template)) process.exit(1);
 			return template;
 		},
-		title: () =>
-			cliTitle
-				? Promise.resolve(cliTitle)
-				: p.text({
-					message: "Module Title?",
-					placeholder: "My New Module",
-					defaultValue: "My New Module",
-				}),
-		id: ({ results }: any) => {
+		title: () => {
+			if (cliTitle) return Promise.resolve(cliTitle);
+			return p.text({
+				message: "Module Title?",
+				placeholder: "My New Module",
+				defaultValue: "My New Module",
+			});
+		},
+		id: (opts) => {
 			const defaultId =
-				results.title
+				(opts.results.title as string | undefined)
 					?.toLowerCase()
 					.replace(/\s+/g, "-")
 					.replace(/[^a-z0-9-]/g, "") ?? "my-module";
-			return autoId
-				? Promise.resolve(defaultId)
-				: p.text({
-					message: "Module ID?",
-					initialValue: defaultId,
-					defaultValue: defaultId,
-					placeholder: defaultId,
-				});
+			if (autoId) return Promise.resolve(defaultId);
+			return p.text({
+				message: "Module ID?",
+				initialValue: defaultId,
+				defaultValue: defaultId,
+				placeholder: defaultId,
+				validate: (value: string | undefined) => {
+					if (!value) {
+						return "Module ID is required";
+					}
+					if (!moduleIdRegex.test(value)) {
+						return "Module ID must be lowercase alphanumeric with hyphens only (e.g., my-awesome-module)";
+					}
+				},
+			});
 		},
-		exists: async ({ results }: any) => {
-			const fullPath = resolve(process.cwd(), results.id);
+		exists: async (opts) => {
+			const id = opts.results.id as string;
+			const fullPath = resolve(process.cwd(), id);
 			const exists = existsSync(fullPath);
 			if (exists) {
 				const confirm = await p.confirm({
 					message: `Folder already exists at ${fullPath}. Overwrite?`,
 					initialValue: false,
 				});
-				if (!confirm) {
+				if (p.isCancel(confirm) || !confirm) {
 					p.cancel("Cancelled due to already existing folder.");
-					process.exit(0);
+					process.exit(1);
 				} else {
 					deleteFolder = true;
 				}
 			}
-			return Promise.resolve();
 		},
 		description: () =>
 			p.text({ message: "Module Description?", defaultValue: "" }),
@@ -107,11 +184,7 @@ const data = await p.group(
 			p.select({
 				message: "Foundry Version?",
 				initialValue: "13",
-				options: [
-					// Just V13 and V14
-					{ label: "V13", value: "13" },
-					{ label: "V14", value: "14" },
-				],
+				options: foundryVersions,
 			}),
 		system: () =>
 			p.multiselect({
@@ -126,46 +199,48 @@ const data = await p.group(
 			p.multiselect({
 				message: "What Packs?",
 				required: false,
-				initialValues: packs,
+				initialValues: [],
 				options: packs.map((pack) => ({
 					label: pack.label,
 					value: pack,
 				})),
 			}),
-		containPacks: ({ results }: any) =>
-			results.packs?.length > 0
+		containPacks: (opts) => {
+			const packResults = opts.results.packs as PackEntry[] | undefined;
+			return (packResults?.length ?? 0) > 0
 				? p.confirm({
 					message: "Put Packs in a Folder?",
 					initialValue: true,
 				})
-				: Promise.resolve(false),
-		containPacksFolder: ({ results }: any) =>
-			results.containPacks
+				: Promise.resolve(false);
+		},
+		containPacksFolder: (opts) => {
+			const containPacks = opts.results.containPacks as boolean;
+			const title = opts.results.title as string;
+			return containPacks
 				? p.text({
 					message: "Folder Name?",
-					placeholder: results.title,
-					defaultValue: results.title,
+					placeholder: title,
+					defaultValue: title,
 				})
-				: Promise.resolve(),
+				: undefined;
+		},
 		enabledAddons: () => {
 			if (addons.length > 0) {
 				return p.multiselect({
 					message: "Enable addons?",
 					required: false,
-					// initialValues: addons.filter(x => x.default).map(x => x.id),
 					options: addons.map((addon) => ({
 						label: `${addon.name} - ${addon.description}`,
 						value: addon.id,
 					})),
-				})
+				});
 			}
-			else {
-				return Promise.resolve([])
-			}
+			return Promise.resolve([]);
 		},
 	},
-	{ onCancel: () => process.exit(0) },
-)
+	{ onCancel: () => process.exit(1) },
+) as Results;
 
 // Resolve module path relative to cwd
 const modulePath = resolve(process.cwd(), data.id);
@@ -179,15 +254,15 @@ await p.tasks([
 		title: "[Task] Deleting existing directory",
 		enabled: deleteFolder,
 		task: async () => {
-			if (deleteFolder) rmSync(modulePath, { recursive: true });
-			return "✅ Existing directory deleted";
+			if (deleteFolder) rmSync(modulePath, { recursive: true, force: true });
+			return "Existing directory deleted";
 		},
 	},
 	{
 		title: "[Task] Making directory",
 		task: async () => {
 			await mkdir(modulePath, { recursive: true });
-			return `✅ ${modulePath} directory created`;
+			return `${modulePath} directory created`;
 		},
 	},
 	{
@@ -200,14 +275,14 @@ await p.tasks([
 					recursive: true,
 				},
 			);
-			return "✅ Template copied";
+			return "Template copied";
 		},
 	},
 	{
 		title: "[Task] Writing module.json",
 		task: async () => {
 			const modPath = join(modulePath, "module.json");
-			const mod = JSON.parse(await readFile(modPath, "utf8")) satisfies Record<string, any>;
+			const mod = JSON.parse(await readFile(modPath, "utf8")) as Record<string, unknown>;
 
 			// inject user data
 			mod.id = data.id;
@@ -217,9 +292,11 @@ await p.tasks([
 				minimum: data.version,
 				verified: data.version,
 			};
-			mod.relationships.systems = data.system.map((system) =>
-				systems.find((s) => s.id === system),
-			);
+			mod.relationships = {
+				systems: data.system.map((system) =>
+					systems.find((s) => s.id === system),
+				),
+			};
 			mod.packs = data.packs.flatMap((pack) =>
 				data.system.map((system) => ({
 					...pack,
@@ -234,74 +311,97 @@ await p.tasks([
 						name: data.containPacksFolder,
 						sorting: "m",
 						color: "#00000f",
-						packs: mod.packs.map((x: typeof packs[number]) => x.name),
+						packs: (mod.packs as Array<{ name: string }>).map((x) => x.name),
 					},
 				];
 			}
 			if (data.system.includes("dnd5e")) {
-				mod.flags.dnd5e = {
+				(mod.flags as Record<string, unknown>) ??= {};
+				(mod.flags as Record<string, unknown>).dnd5e = {
 					sourceBooks: {
-						[mod.id]: data.title,
+						[data.id]: data.title,
 					},
 					spellLists: [],
 				};
 			}
 			// https://github.com/foundryvtt/pf2e/wiki/Creating-a-PF2e-Content-Module
 			if (data.system.includes("pf2e")) {
-				mod.flags[mod.id] ??= {};
-				mod.flags[mod.id]['pf2e-homebrew'] = {
-					classTraits: {},
-					creatureTraits: {},
-					damageTypes: {},
-					featTraits: {},
-					languages: {},
-					magicSchools: {},
-					skills: {},
-					spellTraits: {},
-					weaponCategories: {},
-					weaponGroups: {},
-					baseWeapons: {},
-					weaponTraits: {},
-					equipmentTraits: {},
-					shieldTraits: {},
+				(mod.flags as Record<string, unknown>) ??= {};
+				(mod.flags as Record<string, Record<string, unknown>>)[data.id] = {
+					'pf2e-homebrew': {
+						classTraits: {},
+						creatureTraits: {},
+						damageTypes: {},
+						featTraits: {},
+						languages: {},
+						magicSchools: {},
+						skills: {},
+						spellTraits: {},
+						weaponCategories: {},
+						weaponGroups: {},
+						baseWeapons: {},
+						weaponTraits: {},
+						equipmentTraits: {},
+						shieldTraits: {},
+					},
 				};
 			}
 
 			await writeFile(modPath, JSON.stringify(mod, null, "\t"));
 
-			return "✅ module.json created";
+			return "module.json created";
 		},
 	},
 	{
 		title: "[Task] Writing README.md",
 		task: async () => {
-			const readmePath = join(modulePath, "README.md");
-			const readme = `# ${data.title}
-${data.description}
+			const readmeParts: string[] = [];
+			readmeParts.push(`# ${data.title}`);
+			readmeParts.push(data.description);
+			readmeParts.push("");
+			readmeParts.push("## Installation");
+			readmeParts.push("");
+			readmeParts.push("```");
+			readmeParts.push(`cd ${data.id} ${hasPackageJSON() ? "&& bun install" : "and get to making stuff!"}`);
+			readmeParts.push("```");
 
-## Installation
+			if (data.template === "vite") {
+				readmeParts.push("");
+				readmeParts.push("## Scripts");
+				readmeParts.push("");
+				readmeParts.push("| Script | Description |");
+				readmeParts.push("|--------|-------------|");
+				readmeParts.push("| `dev` | Start the development server with HMR |");
+				readmeParts.push("| `build` | Build the module for production |");
+				readmeParts.push("| `symlink` | Symlink the module to your Foundry data directory |");
+				readmeParts.push("| `extract` | Extract Foundry compendium packs |");
+			}
 
-\`\`\`
-cd ${data.id} ${hasPackageJSON() ? "&& bun install" : "and get to making stuff!"}
-\`\`\`
+			readmeParts.push("");
+			readmeParts.push("## Resources");
+			readmeParts.push("");
 
-## Resources
+			if (data.system.includes("dnd5e")) {
+				readmeParts.push("D&D5e Wiki: https://github.com/foundryvtt/dnd5e/wiki");
+				readmeParts.push("D&D5e Specific Module Flags: https://github.com/foundryvtt/dnd5e/wiki/Module-Registration");
+				readmeParts.push("");
+			}
 
-${data.system.includes("dnd5e")
-					? `D&D5e Wiki: https://github.com/foundryvtt/dnd5e/wiki
-D&D5e Specific Module Flags: https://github.com/foundryvtt/dnd5e/wiki/Module-Registration`
-					: ""
-				}
+			if (data.system.includes("pf2e")) {
+				readmeParts.push("PF2e Wiki: https://github.com/foundryvtt/pf2e/wiki");
+				readmeParts.push("");
+			}
 
-${data.system.includes("pf2e")
-					? `PF2e Wiki: https://github.com/foundryvtt/pf2e/wiki`
-					: ""
-				}
-`;
+			if (data.system.includes("sf2e")) {
+				readmeParts.push("SF2e Wiki: https://github.com/schultzcole/sf2e/wiki");
+				readmeParts.push("");
+			}
 
-			await writeFile(readmePath, readme);
+			const readme = readmeParts.join("\n");
 
-			return "✅ README.md created";
+			await writeFile(join(modulePath, "README.md"), readme);
+
+			return "README.md created";
 		},
 	},
 ]);
@@ -312,18 +412,29 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 		p.note(`[Addon] Running ${addonId} setup...`);
 		const setupScript = packageDir(`../addons/${addonId}/setup.mjs`);
 		const addonProcess = spawn(process.execPath, [setupScript], {
-			stdio: "inherit",
 			env: {
 				...process.env,
 				MODULE_DIR: modulePath,
 				ADDON_ID: addonId,
 			},
 		});
+
+		let stdout = "";
+		let stderr = "";
+		addonProcess.stdout?.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
+		addonProcess.stderr?.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+
 		await new Promise<void>((resolve, reject) => {
 			addonProcess.on("close", (code) => {
+				if (stdout.trim()) {
+					p.log.info(stdout.trim());
+				}
 				if (code === 0) {
 					resolve();
 				} else {
+					if (stderr.trim()) {
+						p.log.error(stderr.trim());
+					}
 					reject(new Error(`Addon ${addonId} setup failed with exit code ${code}`));
 				}
 			});
@@ -339,13 +450,19 @@ if (existsSync(onCreatePath)) {
 		message: `Run onCreate script?`,
 		initialValue: true,
 	});
+	if (p.isCancel(runOnCreate)) process.exit(1);
 	if (runOnCreate) {
 		const spin = p.spinner();
 		spin.start("[Task] Running onCreate script...");
 		const onCreateProcess = spawn(process.execPath, [onCreatePath], {
 			cwd: join(modulePath, "scripts"),
-			stdio: "pipe",
 		});
+
+		let stdout = "";
+		let stderr = "";
+		onCreateProcess.stdout?.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
+		onCreateProcess.stderr?.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
+
 		await new Promise<void>((resolve, reject) => {
 			onCreateProcess.on("close", (code) => {
 				if (code === 0) {
@@ -356,7 +473,13 @@ if (existsSync(onCreatePath)) {
 			});
 			onCreateProcess.on("error", reject);
 		});
-		spin.stop("✅ onCreate script completed");
+		if (stdout.trim()) {
+			p.log.info(stdout.trim());
+		}
+		if (stderr.trim()) {
+			p.log.error(stderr.trim());
+		}
+		spin.stop("onCreate script completed");
 	}
 }
 
