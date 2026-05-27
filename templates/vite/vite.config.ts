@@ -21,9 +21,9 @@ const postcss = {
 
 const PACKAGE_ID = `modules/${moduleJSON.id}`;
 
-console.log(`Running foundry port ${foundryPort} -> dev port ${devPort}`)
 
 export default defineConfig(({ mode: _mode }) => {
+	if (_mode.includes('dev')) console.log(`Running foundry port ${foundryPort} -> dev port ${devPort}`);
 	return {
 		root: "src/", // Source location / esbuild root.
 		base: `/${PACKAGE_ID}/dist`, // Base module path.

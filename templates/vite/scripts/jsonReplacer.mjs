@@ -5,5 +5,6 @@
  * @returns {*} The value to be included in the serialized JSON output.
  */
 export function replacer(key, value) {
+	// Modify this to your liking.
 	return value;
 }

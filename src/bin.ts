@@ -6,7 +6,7 @@ import { packs, systems } from "./options.js";
 import { existsSync, readdirSync, rmSync, statSync } from "fs";
 import { join, resolve } from "path";
 
-const {default: pkg} = await import("../package.json", { with: { type: "json" } });
+const { default: pkg } = await import("../package.json", { with: { type: "json" } });
 
 p.intro(`${lightGreen(pkg.name)} v${pkg.version}`);
 p.log.step(`Creating a new Foundry VTT module...`);
@@ -60,10 +60,10 @@ const data = await p.group(
 			cliTitle
 				? Promise.resolve(cliTitle)
 				: p.text({
-						message: "Module Title?",
-						placeholder: "My New Module",
-						defaultValue: "My New Module",
-					}),
+					message: "Module Title?",
+					placeholder: "My New Module",
+					defaultValue: "My New Module",
+				}),
 		id: ({ results }: any) => {
 			const defaultId =
 				results.title
@@ -73,11 +73,11 @@ const data = await p.group(
 			return autoId
 				? Promise.resolve(defaultId)
 				: p.text({
-						message: "Module ID?",
-						initialValue: defaultId,
-						defaultValue: defaultId,
-						placeholder: defaultId,
-					});
+					message: "Module ID?",
+					initialValue: defaultId,
+					defaultValue: defaultId,
+					placeholder: defaultId,
+				});
 		},
 		exists: async ({ results }: any) => {
 			const fullPath = resolve(process.cwd(), results.id);
@@ -130,17 +130,17 @@ const data = await p.group(
 		containPacks: ({ results }: any) =>
 			results.packs?.length > 0
 				? p.confirm({
-						message: "Put Packs in a Folder?",
-						initialValue: true,
-					})
+					message: "Put Packs in a Folder?",
+					initialValue: true,
+				})
 				: Promise.resolve(false),
 		containPacksFolder: ({ results }: any) =>
 			results.containPacks
 				? p.text({
-						message: "Folder Name?",
-						placeholder: results.title,
-						defaultValue: results.title,
-					})
+					message: "Folder Name?",
+					placeholder: results.title,
+					defaultValue: results.title,
+				})
 				: Promise.resolve(),
 		enabledAddons: () => {
 			if (addons.length > 0) {
@@ -220,7 +220,7 @@ await p.tasks([
 					...pack,
 					system,
 					name: `${system}-${pack.name}`,
-					path: `${system}-${pack.path}`
+					path: `packs/${system}-${pack.name}`
 				})),
 			);
 			if (data.containPacks) {
@@ -282,18 +282,16 @@ cd ${data.id} ${hasPackageJSON() ? "&& bun install" : "and get to making stuff!"
 
 ## Resources
 
-${
-	data.system.includes("dnd5e")
-		? `D&D5e Wiki: https://github.com/foundryvtt/dnd5e/wiki
+${data.system.includes("dnd5e")
+					? `D&D5e Wiki: https://github.com/foundryvtt/dnd5e/wiki
 D&D5e Specific Module Flags: https://github.com/foundryvtt/dnd5e/wiki/Module-Registration`
-		: ""
-}
+					: ""
+				}
 
-${
-	data.system.includes("pf2e")
-		? `PF2e Wiki: https://github.com/foundryvtt/pf2e/wiki`
-		: ""
-}
+${data.system.includes("pf2e")
+					? `PF2e Wiki: https://github.com/foundryvtt/pf2e/wiki`
+					: ""
+				}
 `;
 
 			await Bun.write(readmePath, readme);

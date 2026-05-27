@@ -26,7 +26,7 @@
 		"canUpload": true,
 		"hotReload": {
 			"extensions": ["css", "json"],
-			"paths": ["styles"]
+			"paths": ["dist"]
 		}
 	},
 	"url": "https://github.com/AUTHOR/REPO",
