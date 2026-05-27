@@ -6,7 +6,11 @@
 
 import * as p from "@clack/prompts";
 import { cyan } from "kolorist";
-import { mkdir } from "fs/promises";
+import { mkdir, readFile, writeFile } from "fs/promises";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const data = await p.group(
 	{
@@ -14,7 +18,7 @@ const data = await p.group(
 			p.multiselect({
 				message: "Additional features?",
 				initialValues: [],
-        required: false,
+				required: false,
 				options: [
 					// { label: "Prereleases", value: "prereleases" },
 					{ label: "Uploading via FTP", value: "ftp" },
@@ -26,8 +30,7 @@ const data = await p.group(
 );
 
 // Grab main.yml template
-const addonDir = import.meta.dir;
-const mainYmlTemplate = await Bun.file(`${addonDir}/main.yml`).text();
+const mainYmlTemplate = await readFile(`${__dirname}/main.yml`, "utf8");
 
 // Get the module directory from environment variable
 const moduleDir = process.env.MODULE_DIR || process.cwd();
@@ -43,15 +46,15 @@ if (data.features.includes("discord") || data.features.includes("ftp")) {
 
             - name: Get FTP Path
               id: ftp
-              run: echo "ftp=\${{fromJson(steps.set_var.outputs.PACKAGE_JSON).flags.ftpPath}}" >> "$GITHUB_OUTPUT"
+              run: echo "ftp=\${{fromJson(steps.set_var.outputs.PACKAGE_JSON).flags.ftpPath}}" >> "$GITHUB_OUTPUT
 
             - name: Get Module ID
               id: module_id
-              run: echo "module_id=\${{fromJson(steps.set_var.outputs.PACKAGE_JSON).id}}" >> "$GITHUB_OUTPUT"
+              run: echo "module_id=\${{fromJson(steps.set_var.outputs.PACKAGE_JSON).id}}" >> "$GITHUB_OUTPUT
 
             - name: Get Module Title
               id: title
-              run: echo "title=\${{fromJson(steps.set_var.outputs.PACKAGE_JSON).title}}" >> "$GITHUB_OUTPUT"
+              run: echo "title=\${{fromJson(steps.set_var.outputs.PACKAGE_JSON).title}}" >> "$GITHUB_OUTPUT
 `;
 }
 
@@ -98,7 +101,7 @@ if (data.features.includes("discord")) {
 // Create main.yml file
 const workflowDir = `${moduleDir}/.github/workflows`;
 await mkdir(workflowDir, { recursive: true });
-await Bun.write(`${workflowDir}/main.yml`, mainYml);
+await writeFile(`${workflowDir}/main.yml`, mainYml);
 
 let note = "✅ Installed!";
 note += "\nThe Github workflow is triggered by making a new release. To make a new release go to your repository's Releases page which can be found in the sidebar on the right and press \"Draft a new release.\" Fill in the version number and you're done!"
