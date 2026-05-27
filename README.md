@@ -6,18 +6,18 @@ A CLI scaffolding tool for creating Foundry VTT modules.
 
 ### Global Installation (for end users)
 
-Once published to npm, you can run the script via Bun:
+Once published to npm, you can run the script:
 
 ```bash
 bunx create-fvtt-module
+npx create-fvtt-module
 ```
-
-Other package managers are untested. PRs to make the tool compatible with them are welcome.
 
 Updating the package:
 
 ```bash
 bun i create-fvtt-module@latest -g
+npm install -g create-fvtt-module@latest
 ```
 
 ### Development Installation
