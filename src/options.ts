@@ -50,21 +50,21 @@ const systems = [
 		id: "dnd5e",
 		type: "system",
 		compatibility: {
-			minimum: "5.2",
+			minimum: "5",
 		},
 	},
 	{
 		id: "pf2e",
 		type: "system",
 		compatibility: {
-			minimum: "7.8",
+			minimum: "8",
 		},
 	},
 	{
 		id: "sf2e",
 		type: "system",
 		compatibility: {
-			minimum: "7.8",
+			minimum: "1",
 		},
 	},
 ];
