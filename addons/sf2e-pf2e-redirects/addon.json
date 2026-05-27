@@ -1,5 +1,5 @@
 {
-	"name": "SF2e to PF2e UUID Redirects",
-	"description": "Adds UUID redirects for modules that support both Starfinder 2e and Pathfinder 2e, allowing sf2e pack references to resolve to pf2e packs",
-	"default": false
+	"name": "SF2e <=> PF2e UUID Redirects",
+	"description": "Adds UUID redirects for modules that support both SF2e and PF2e. Skipped if module doesn't support both systems.",
+	"default": true
 }
