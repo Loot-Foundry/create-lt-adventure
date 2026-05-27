@@ -1,11 +1,11 @@
-import { renameSync } from "fs";
+import { renameSync, readFileSync, writeFileSync } from "fs";
 
-const mod = (await Bun.file("../module.json").json());
-const pack = (await Bun.file("../package.json").json());
-const css = (await Bun.file("../src/module.css").text());
+const mod = JSON.parse(readFileSync("../module.json", "utf8"));
+const pack = JSON.parse(readFileSync("../package.json", "utf8"));
+const css = readFileSync("../src/module.css", "utf8");
 
 // CSS
-css.replaceAll("module-template", mod.id);
+const updatedCss = css.replaceAll("module-template", mod.id);
 
 // Package
 pack.name = mod.id;
@@ -31,11 +31,9 @@ const packString = JSON.stringify(pack, null, "\t")
 	// .replaceAll("AUTHOR", data.author)
 	.replaceAll("REPO", mod.id);
 
-await Bun.write("../module.json", modString);
-await Bun.write("../package.json", packString);
-await Bun.write("../src/module.css", css);
+writeFileSync("../module.json", modString);
+writeFileSync("../package.json", packString);
+writeFileSync("../src/module.css", updatedCss);
 
 // Rename gitignore to .gitignore
 renameSync("../gitignore", "../.gitignore");
-
-export { };
