@@ -6,6 +6,7 @@ import path from "node:path";
 import * as p from "@clack/prompts";
 import { extractPack } from "@foundryvtt/foundryvtt-cli";
 import { yellow } from "kolorist";
+import { replacer } from "./jsonReplacer.mjs";
 // import moduleJSON from "../module.json" with { type: "json" };
 
 const foundryDataDir = "packs/";
@@ -34,11 +35,15 @@ await p.tasks(
 				path.resolve(packsCompiled, pack),
 				`${jsonDataDir}/${pack}`,
 				{
-					expandAdventures: true,
+					expandAdventures: true, // If false, you can remove ignoreAdventureHMR in vite.config
 					omitVolatile: true,
-					folders: false,
+					folders: true,
 					clean: true,
-					log: false
+					log: false,
+					jsonOptions: {
+						replacer,
+						space: "\t"
+					}
 				},
 			);
 			return `Extracted ${yellow(pack)}!`

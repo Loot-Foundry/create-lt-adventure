@@ -1,6 +1,7 @@
 my-new-module/
 dist/
 *.tsbuildinfo
+.vite-cache
 
 # Logs
 logs

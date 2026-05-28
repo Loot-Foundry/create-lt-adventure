@@ -8,7 +8,7 @@ import { defineConfig } from "vite";
 import moduleJSON from "./module.json" with { type: "json" };
 import "dotenv/config";
 
-const target = "es2022"; // Build target for the vinal bundle.
+const target = "es2022"; // Build target for the final bundle.
 const foundryPort = Number(process.env.FOUNDRY_PORT || 30000); // Which port your FoundryVTT instance is hosted at.
 const devPort = Number(process.env.DEV_PORT || 30001); // Which port you want to use for development.
 const libEntry = "index.js"; // The main entry file to begin crawling from (root being `src/`).
@@ -44,6 +44,7 @@ export default defineConfig(({ mode: _mode }) => {
 			alias: {
 				$lib: path.resolve(__dirname, "./src/lib"),
 				moduleJSON: path.resolve(__dirname, "./module.json"),
+				// Modify also the tsconfig.json file to include the alias
 			},
 		},
 
@@ -95,7 +96,7 @@ export default defineConfig(({ mode: _mode }) => {
 		},
 
 		plugins: [
-			vttSync(moduleJSON, {}) as Plugin[], // Build the database from JSON files on build
+			vttSync(moduleJSON, { ignoreAdventureHMR: true }), // Build the database from JSON files on build
 			{
 				name: "create-dist-files", // Create dummy files for Foundry's tests to pass
 				apply: "serve",

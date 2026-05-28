@@ -26,11 +26,12 @@
 		"canUpload": true,
 		"hotReload": {
 			"extensions": ["css", "json"],
-			"paths": ["styles"]
+			"paths": ["dist"]
 		}
 	},
-	"url": "",
-	"bugs": "",
-	"manifest": "",
-	"download": ""
+	"url": "https://github.com/AUTHOR/REPO",
+	"bugs": "https://github.com/AUTHOR/REPO/issues",
+	"changelog": "https://github.com/AUTHOR/REPO/blob/main/CHANGELOG",
+	"manifest": "https://raw.githubusercontent.com/AUTHOR/REPO/latest/releases/module.json",
+	"download": "https://raw.githubusercontent.com/AUTHOR/REPO/latest/releases/module.zip"
 }

@@ -49,21 +49,29 @@ const systems = [
 	{
 		id: "dnd5e",
 		type: "system",
-		manifest:
-			"https://github.com/foundryvtt/dnd5e/releases/latest/download/system.json",
 		compatibility: {
-			minimum: "5.2",
+			minimum: "5",
 		},
 	},
 	{
 		id: "pf2e",
 		type: "system",
-		manifest:
-			"https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
 		compatibility: {
-			minimum: "7.8",
+			minimum: "8",
+		},
+	},
+	{
+		id: "sf2e",
+		type: "system",
+		compatibility: {
+			minimum: "1",
 		},
 	},
 ];
 
-export { packs, systems };
+const foundryVersions = [
+	{ label: "V13", value: "13" },
+	{ label: "V14", value: "14" },
+];
+
+export { packs, systems, foundryVersions };
