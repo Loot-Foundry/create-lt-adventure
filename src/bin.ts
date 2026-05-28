@@ -416,8 +416,11 @@ if (migrateFromFlag) {
 if (data.enabledAddons && data.enabledAddons.length > 0) {
 	for (const addonId of data.enabledAddons) {
 		p.note(`[Addon] Running ${addonId} setup...`);
+
 		const setupScript = packageDir(`../addons/${addonId}/setup.mjs`);
+
 		const addonProcess = spawn(process.execPath, [setupScript], {
+			stdio: "inherit",
 			env: {
 				...process.env,
 				MODULE_DIR: modulePath,
@@ -425,25 +428,18 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 			},
 		});
 
-		let stdout = "";
-		let stderr = "";
-		addonProcess.stdout?.on("data", (chunk: Buffer) => { stdout += chunk.toString(); });
-		addonProcess.stderr?.on("data", (chunk: Buffer) => { stderr += chunk.toString(); });
-
 		await new Promise<void>((resolve, reject) => {
 			addonProcess.on("close", (code) => {
-				if (stdout.trim()) {
-					p.log.info(stdout.trim());
-				}
 				if (code === 0) {
 					resolve();
-				} else {
-					if (stderr.trim()) {
-						p.log.error(stderr.trim());
-					}
-					reject(new Error(`Addon ${addonId} setup failed with exit code ${code}`));
+					return;
 				}
+
+				reject(
+					new Error(`Addon ${addonId} setup failed with exit code ${code}`),
+				);
 			});
+
 			addonProcess.on("error", reject);
 		});
 	}
