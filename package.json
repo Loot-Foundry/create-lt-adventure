@@ -1,6 +1,6 @@
 {
-	"name": "create-fvtt-module",
-	"version": "0.3.0",
+	"name": "create-lt-adventure",
+	"version": "0.1.0",
 	"description": "A CLI tool to scaffold Foundry VTT modules",
 	"keywords": [
 		"foundry-vtt",
@@ -12,11 +12,11 @@
 	"author": "mrvauxs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/MrVauxs/create-fvtt-module"
+		"url": "https://github.com/MrVauxs/create-lt-adventure"
 	},
-	"homepage": "https://github.com/MrVauxs/create-fvtt-module#readme",
+	"homepage": "https://github.com/MrVauxs/create-lt-adventure#readme",
 	"bugs": {
-		"url": "https://github.com/MrVauxs/create-fvtt-module/issues"
+		"url": "https://github.com/MrVauxs/create-lt-adventure/issues"
 	},
 	"type": "module",
 	"main": "./dist/index.js",
@@ -31,7 +31,7 @@
 		}
 	},
 	"bin": {
-		"create-fvtt-module": "./dist/bin.js"
+		"create-lt-adventure": "./dist/bin.js"
 	},
 	"files": [
 		"dist/",
@@ -41,6 +41,7 @@
 		"README.md"
 	],
 	"scripts": {
+		"create": "bun src/bin.ts",
 		"build": "tsc",
 		"build:watch": "tsc --watch",
 		"prepublishOnly": "npm run build",

@@ -1,3 +1,306 @@
-.module-template {
-  /* Your CSS styles here */
+:root {
+  --((moduleId))-checks-color-light: #074e4b;
+  --((moduleId))-checks-color-dark: hsl(69 58 47);
+}
+
+body.theme-light .((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: var(--((moduleId))-checks-color-light);
+}
+
+body.theme-dark .((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: var(--((moduleId))-checks-color-dark);
+}
+
+.themed.theme-dark .((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: var(--((moduleId))-checks-color-dark);
+}
+
+.themed.theme-light .((moduleId)).Checks-and-Saves {
+  font-weight: bold;
+  color: var(--((moduleId))-checks-color-light);
+}
+
+.((moduleId))-journal .journal-entry-content .sidebar,
+.editor-content .((moduleId)).sidebar {
+  /* font-family: "Candara"; */
+
+  padding: 0.75rem;
+  margin-block: 1.25rem;
+  width: var(--sidebarWidth, 50%);
+  float: right;
+
+  .themed.theme-light &,
+  body.theme-light & {
+    background: oklch(0.393 0.095 152.535 / 0.05);
+  }
+
+  .themed.theme-dark &,
+  body.theme-dark & {
+    background: oklch(0.393 0.095 152.535 / 0.2);
+  }
+
+  margin-right: 0.25rem;
+  margin-left: 1rem;
+
+  &.left {
+    margin-left: 0rem;
+    margin-right: 1.5rem;
+    float: left;
+  }
+
+  & h1,
+  & h2,
+  & h3,
+  & h4 {
+    .themed.theme-light &,
+    body.theme-light & {
+      color: hsl(179, 100%, 10%);
+    }
+    .themed.theme-dark &,
+    body.theme-dark & {
+      color: hsl(120, 25%, 90%);
+    }
+    font-family: "Modesto Condensed";
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    border-color: none;
+    text-decoration-line: none;
+    padding: 0px;
+    margin: 0px;
+  }
+
+  border-image-slice: 50 75 50 75;
+  border-image-width: 20px 26px 20px 26px;
+  border-image-outset: 19px 0px 19px 0px;
+  border-image-repeat: round round;
+  border-image-source: url("/modules/((moduleId))/assets/journals/Sidebar_Frame_Green.webp");
+
+  &.brown {
+    border-image-source: url("/modules/((moduleId))/assets/journals/Sidebar_Frame_Brown.webp");
+  }
+}
+
+.((moduleId))-journal .journal-entry-content {
+  /* font-family: "Kings Caslon"; */
+  text-align: justify;
+
+  blockquote,
+  .readaloud {
+    /* font-family: "Candara"; */
+
+    & > p + p {
+      text-indent: 0px;
+    }
+
+    font-style: initial;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    background: hsl(25, 30%, 75%, 50%);
+    position: relative;
+    z-index: 0;
+
+    border-image-slice: 30 30 30 30;
+    border-image-width: 12px 12px 12px 12px;
+    border-image-outset: 6px 6px 6px 6px;
+    border-image-repeat: stretch stretch;
+    border-image-source: url("/modules/((moduleId))/assets/journals/Read-Aloud_Corner.webp");
+
+    .themed.theme-dark & {
+      background: hsl(25, 30%, 75%, 15%);
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    h3 {
+      border: none;
+    }
+
+    &.limited {
+      width: min-content;
+      white-space: nowrap;
+    }
+  }
+
+  .heliana-style-bg {
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    background-position: center left;
+    z-index: 31;
+    padding-top: 0.25rem;
+    padding-bottom: 0.1rem;
+    padding-inline: 0.25rem;
+
+    & > * {
+      width: min-content;
+      white-space: nowrap;
+      color: white !important;
+      height: 2rem;
+      border-bottom: 0;
+      padding-left: 0.4rem;
+      padding-right: 1.5rem;
+      margin-bottom: 0;
+    }
+  }
+
+  .mask {
+    --mask-size: 40%;
+    border: none;
+    mask-image:
+      url("/modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
+      linear-gradient(white 0 0);
+    mask-composite: add;
+    mask-mode: luminance;
+    mask-position:
+      top right,
+      bottom;
+    mask-size:
+      101% var(--mask-size),
+      101% calc(101% - var(--mask-size));
+    mask-repeat: no-repeat;
+
+    &.upside-down {
+      transform: scaleY(-1);
+    }
+  }
+
+  .scrollable div.scenery {
+    position: sticky;
+    display: relative;
+    top: 0;
+    transition: opacity 300ms ease-out;
+    margin-bottom: -2rem;
+    margin-inline: 0px;
+    scale: 101%;
+
+    &.upside-down > * {
+      width: 100%;
+      transform: scaleY(-1);
+    }
+
+    & > header {
+      --height: 10rem;
+      position: absolute;
+      width: 100%;
+      height: var(--height);
+      bottom: calc(50% - var(--height) / 2);
+
+      text-align: center;
+      font-size: 2rem;
+      line-height: var(--height);
+      font-family: "Coinage Caps Kruger Gray";
+      color: white;
+
+      background: rgba(0, 0, 0, 66%);
+
+      border: none;
+      mask-image:
+        url("/modules/((moduleId))/assets/journals/masks/mask-soft-04.webp"),
+        url("/modules/((moduleId))/assets/journals/masks/flipped/mask-soft-04.webp");
+      mask-composite: add;
+      mask-mode: luminance;
+      mask-position: top, bottom;
+      mask-size:
+        100% 51%,
+        100% 50%;
+      mask-repeat: no-repeat;
+    }
+
+    & img {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      cursor: pointer;
+    }
+  }
+
+  .journal-entry-pages {
+    margin: 0;
+    padding-right: 0;
+    & > * {
+      margin-inline: 16px;
+    }
+  }
+}
+
+.((moduleId))-journal.application {
+  &:not(.minimized) {
+    --ltBorderCut: 32;
+    --ltBorderOutset: 32;
+    corner-top-left-shape: notch;
+    corner-top-right-shape: notch;
+    corner-bottom-left-shape: notch;
+    border-radius: var(--ltBorderRadius, 15px);
+    border-bottom-right-radius: 0;
+    overflow: visible;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% + var(--ltBorderSizeMod, 0px));
+      height: calc(100% + var(--ltBorderSizeMod, 0px));
+      border-image: var(
+          --urlBorderImage,
+          url("/modules/((moduleId))/assets/journals/borders/panel-border-026.webp")
+        )
+        var(--ltBorderCut) var(--ltBorderCut) var(--ltBorderCut)
+        var(--ltBorderCut) fill / calc(1px * var(--ltBorderOutset))
+        calc(1px * var(--ltBorderOutset)) calc(1px * var(--ltBorderOutset))
+        calc(1px * var(--ltBorderOutset));
+      pointer-events: none;
+    }
+  }
+
+  &:not(.minimized) .window-header {
+    padding: 0 36px;
+  }
+
+  & footer {
+    margin-left: 2.25rem;
+    padding-inline: 0;
+    padding-block: 0.5rem 0.75rem;
+  }
+
+  &.sheet.journal-entry .journal-entry-page + .journal-entry-page {
+    margin-top: 0.5rem;
+  }
+
+  & aside.sidebar {
+    position: relative;
+
+    &::before {
+      z-index: -100;
+      content: "";
+      position: absolute;
+
+      margin-top: -2rem;
+      height: 100%;
+      width: 100%;
+
+      opacity: 33%;
+      background-image: var(--sidebarImage);
+      background-size: cover;
+
+      --mask-size: 10%;
+      mask-image:
+        url("/modules/((moduleId))/assets/journals/masks/mask-hard-06.webp"),
+        linear-gradient(white 0 0),
+        url("/modules/((moduleId))/assets/journals/masks/flipped/mask-soft-04.webp");
+      mask-composite: add;
+      mask-mode: luminance;
+      mask-position: top, center, bottom;
+      mask-size:
+        101% var(--mask-size),
+        100% calc(100% - 2 * var(--mask-size)),
+        101% var(--mask-size);
+      mask-repeat: no-repeat;
+    }
+  }
 }

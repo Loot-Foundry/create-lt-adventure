@@ -46,3 +46,51 @@ jobs:
           artifacts: "./module.json, ./module.zip"
           omitDraftDuringUpdate: true
           omitPrereleaseDuringUpdate: true
+
+      # https://stackoverflow.com/questions/61919141/read-json-file-in-github-actions
+      - id: set_var
+        run: echo "PACKAGE_JSON=$(jq -c . < module.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Get Module ID
+        id: module_id
+        run: echo "module_id=${{ fromJson(steps.set_var.outputs.PACKAGE_JSON).id }}" >> "$GITHUB_OUTPUT"
+
+      - name: Get FTP Path
+        id: ftp
+        run: echo "ftp=${{ fromJson(steps.set_var.outputs.PACKAGE_JSON).flags.ftpPath || format('NEW/{0}', steps.module_id.outputs.module_id) }}" >> "$GITHUB_OUTPUT"
+
+      - name: Get Module Title
+        id: title
+        run: echo "title=${{fromJson(steps.set_var.outputs.PACKAGE_JSON).title}}" >> "$GITHUB_OUTPUT"
+
+      - name: Put Files into FTP Folder
+        env:
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        if: ${{ env.FTP_PASSWORD != '' }}
+        run: |
+          ls
+          mkdir _ftp
+          cp module.json _ftp/
+          cp module.zip _ftp/
+          mkdir _ftp/${{steps.module_id.outputs.module_id}}
+          cp module.json _ftp/${{steps.module_id.outputs.module_id}}/
+
+      - name: Upload FTP
+        uses: sebastianpopp/ftp-action@releases/v2
+        env:
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        if: ${{ env.FTP_PASSWORD != '' }}
+        with:
+          host: ${{ secrets.FTP_SERVER }}
+          user: ${{ secrets.FTP_USERNAME }}
+          password: ${{ env.FTP_PASSWORD }}
+          localDir: _ftp
+          remoteDir: ${{steps.ftp.outputs.ftp}}
+
+      - name: Send Discord Ping
+        uses: Ilshidur/action-discord@0.3.2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        if: ${{ env.DISCORD_WEBHOOK != '' && !github.event.release.prerelease }}
+        with:
+          args: "${{steps.title.outputs.title}} has been updated to version `${{github.event.release.tag_name}}`!"

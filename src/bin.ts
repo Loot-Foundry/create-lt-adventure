@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 import * as p from "@clack/prompts";
 import { cyan, lightGreen } from "kolorist";
 import { mkdir, cp, readFile, writeFile } from "fs/promises";
@@ -83,7 +83,6 @@ interface Results {
 	version: string;
 	system: string[];
 	packs: PackEntry[];
-	containPacks: boolean;
 	containPacksFolder?: string;
 	enabledAddons: string[];
 }
@@ -203,49 +202,39 @@ const data = await p.group(
 			p.multiselect({
 				message: "What Packs?",
 				required: false,
-				initialValues: [],
+				initialValues: packs,
 				options: packs.map((pack) => ({
 					label: pack.label,
 					value: pack,
 				})),
 			}),
-		containPacks: (opts) => {
-			const packResults = opts.results.packs as PackEntry[] | undefined;
-			return (packResults?.length ?? 0) > 0
-				? p.confirm({
-					message: "Put Packs in a Folder?",
-					initialValue: true,
-				})
-				: Promise.resolve(false);
-		},
-		containPacksFolder: (opts) => {
-			const containPacks = opts.results.containPacks as boolean;
-			const title = opts.results.title as string;
-			return containPacks
-				? p.text({
-					message: "Folder Name?",
-					placeholder: title,
-					defaultValue: title,
-				})
-				: undefined;
-		},
+		containPacksFolder: ({ results }: any) =>
+			p.text({
+				message: "Folder Name?",
+				placeholder: results.title,
+				defaultValue: results.title,
+			}),
 		enabledAddons: () => {
 			if (addons.length > 0) {
 				return p.multiselect({
 					message: "Enable addons?",
 					required: false,
+					initialValues: addons.filter(x => x.default).map(x => x.id),
 					options: addons.map((addon) => ({
 						label: `${addon.name} - ${addon.description}`,
 						value: addon.id,
 					})),
-				});
+				})
 			}
-			return Promise.resolve([]);
+			else {
+				return Promise.resolve([])
+			}
 		},
 	},
 	{ onCancel: () => process.exit(1) },
 ) as Results;
 
+// Resolve module path relative to cwd
 const modulePath = resolve(process.cwd(), data.id);
 
 function hasPackageJSON(): boolean {
@@ -307,16 +296,21 @@ await p.tasks([
 					path: `packs/${system}-${pack.name}`
 				})),
 			);
-			if (data.containPacks) {
-				mod.packFolders = [
-					{
-						name: data.containPacksFolder,
-						sorting: "m",
-						color: "#00000f",
-						packs: (mod.packs as Array<{ name: string }>).map((x) => x.name),
-					},
-				];
-			}
+			mod.packFolders = [
+				{
+					name: "Loot Tavern",
+					sorting: "m",
+					color: "#00000f",
+					folders: [
+						{
+							name: data.containPacksFolder,
+							sorting: "m",
+							color: "#00000f",
+							packs: data.packs.map((x) => x.name),
+						}
+					]
+				},
+			];
 			if (data.system.includes("dnd5e")) {
 				(mod.flags as Record<string, unknown>) ??= {};
 				(mod.flags as Record<string, unknown>).dnd5e = {

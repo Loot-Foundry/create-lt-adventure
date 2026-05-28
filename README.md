@@ -1,4 +1,4 @@
-# create-fvtt-module
+# create-lt-adventure
 
 A CLI scaffolding tool for creating Foundry VTT modules.
 
@@ -6,18 +6,22 @@ A CLI scaffolding tool for creating Foundry VTT modules.
 
 ### Global Installation (for end users)
 
-Once published to npm, you can run the script:
+Once published to npm, you can run the script via Bun:
 
 ```bash
-bunx create-fvtt-module
-npx create-fvtt-module
+bunx create-lt-adventure
 ```
 
 Updating the package:
 
 ```bash
-bun i create-fvtt-module@latest -g
-npm install -g create-fvtt-module@latest
+create-lt-adventure
+```
+
+Update the package using
+
+```bash
+bun update create-lt-adventure -g --latest
 ```
 
 ### Development Installation
@@ -25,8 +29,8 @@ npm install -g create-fvtt-module@latest
 For development purposes:
 
 ```bash
-git clone https://github.com/MrVauxs/create-fvtt-module
-cd create-fvtt-module
+git clone https://github.com/Loot-Foundry/create-lt-adventure
+cd create-lt-adventure
 bun install
 bun run dev
 ```
@@ -78,4 +82,4 @@ Contributions are welcome! Please feel free to submit pull requests.
 
 ## Issues
 
-Found a bug? Please open an issue on [GitHub](https://github.com/MrVauxs/create-fvtt-module/issues).
+Found a bug? Please open an issue on [GitHub](https://github.com/Loot-Foundry/create-lt-adventure/issues).
