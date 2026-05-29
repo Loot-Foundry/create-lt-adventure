@@ -48,13 +48,15 @@
 		"prepack": "npm run build",
 		"dev": "bun src/bin.ts \"My New Module\" --auto-id"
 	},
-	"devDependencies": {
-		"@clack/prompts": "^1.0.0-alpha.9",
+	"dependencies": {
+		"kolorist": "^1.8.0",
+		"adm-zip": "^0.5.16",
 		"@foundryvtt/foundryvtt-cli": "^1.0.0",
+		"@clack/prompts": "^1.0.0-alpha.9"
+	},
+	"devDependencies": {
 		"@types/adm-zip": "^0.5.7",
 		"@types/node": "^20.19.39",
-		"adm-zip": "^0.5.16",
-		"kolorist": "^1.8.0",
 		"typescript": "^5"
 	},
 	"peerDependencies": {
