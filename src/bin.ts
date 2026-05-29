@@ -399,6 +399,30 @@ await p.tasks([
 				readmeParts.push("");
 			}
 
+			if (data.enabledAddons.includes("github-workflow")) {
+				readmeParts.push("## GitHub Workflow");
+				readmeParts.push("");
+				readmeParts.push("This module uses GitHub Actions to automate releases. When a new release is created, the workflow will build the module and create a release with the built files.");
+				readmeParts.push("");
+				readmeParts.push("Make sure to set the following secrets in your GitHub repository:");
+				readmeParts.push("- `FTP_SERVER` - The FTP server address");
+				readmeParts.push("- `FTP_USERNAME` - The FTP username");
+				readmeParts.push("- `FTP_PASSWORD` - The FTP password");
+				readmeParts.push("- `DISCORD_WEBHOOK` - The Discord webhook URL for notifications");
+				readmeParts.push("");
+				readmeParts.push("The workflow file can be found at `.github/workflows/main.yml`.");
+				readmeParts.push("");
+			}
+
+			readmeParts.push("## Setting this repo up");
+			readmeParts.push("");
+			readmeParts.push("To link this to an **existing** GitHub repository, run:");
+			readmeParts.push("```");
+			readmeParts.push(`  git remote add origin https://github.com/Loot-Foundry/${data.id}.git`);
+			readmeParts.push(`  git branch -M main`);
+			readmeParts.push(`  git push -u origin main`);
+			readmeParts.push("```");
+
 			const readme = readmeParts.join("\n");
 
 			await writeFile(join(modulePath, "README.md"), readme);
