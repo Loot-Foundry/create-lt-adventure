@@ -1,7 +1,7 @@
 import type { Plugin, UserConfig } from "vite";
 import fs from "node:fs";
 import path from "node:path";
-import vttSync from "foundryvtt-sync";
+import vttSync from "foundryvtt-sync/vite";
 import postcssPresetEnv from "postcss-preset-env";
 import PostCSSReplace from "postcss-replace";
 import { defineConfig } from "vite";
@@ -114,13 +114,13 @@ export default defineConfig(({ mode: _mode }) => {
 				apply: 'serve',
 				configureServer(server) {
 					server.middlewares.use((req, res, next) => {
-					const cssPath = `/${PACKAGE_ID}/dist/${moduleJSON.id}.css`;
-					if (req.url === cssPath) {
-						res.setHeader('Content-Type', 'text/css');
-						res.end('');
-						return;
-					}
-					next();
+						const cssPath = `/${PACKAGE_ID}/dist/${moduleJSON.id}.css`;
+						if (req.url === cssPath) {
+							res.setHeader('Content-Type', 'text/css');
+							res.end('');
+							return;
+						}
+						next();
 					});
 				},
 			},
