@@ -447,10 +447,13 @@ if (data.enabledAddons && data.enabledAddons.length > 0) {
 
 const onCreatePath = join(modulePath, "scripts", "onCreate.mjs");
 if (existsSync(onCreatePath)) {
-	const runOnCreate = await p.confirm({
+	const runOnCreate = true
+	/*
+	await p.confirm({
 		message: `Run onCreate script?`,
 		initialValue: true,
 	});
+	*/
 	if (p.isCancel(runOnCreate)) process.exit(1);
 	if (runOnCreate) {
 		const spin = p.spinner();

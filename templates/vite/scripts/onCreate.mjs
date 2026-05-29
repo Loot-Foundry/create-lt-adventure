@@ -20,6 +20,10 @@ mod.media = [
 		"thumbnail": `modules/${mod.id}/assets/setup.webp`
 	}
 ];
+const randomHash = Math.random().toString(36).substring(2, 8).toUpperCase();
+mod.flags.ftpPath = `NEW/${mod.id}-${randomHash}`;
+mod.manifest = `https://loottavern.com/Foundry%20packs/${mod.flags.ftpPath}/module.json`;
+mod.download = `https://loottavern.com/Foundry%20packs/${mod.flags.ftpPath}/module.zip`;
 
 // Final writes and global renames
 
