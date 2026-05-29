@@ -1,4 +1,5 @@
 import { renameSync, readFileSync, writeFileSync, unlinkSync, existsSync } from "fs";
+import { execSync } from "child_process";
 
 const mod = JSON.parse(readFileSync("../module.json", "utf8"));
 const pack = JSON.parse(readFileSync("../package.json", "utf8"));
@@ -56,4 +57,21 @@ try {
 			// Already gone or doesn't exist - fine
 		}
 	}
+}
+
+// Initialize git repository
+const parentDir = "..";
+const gitDir = `${parentDir}/.git`;
+
+if (!existsSync(gitDir)) {
+	console.log("Initializing git repository...");
+	execSync("git init", { cwd: parentDir, stdio: "inherit" });
+	
+	// Stage all files including dot-prefixed ones
+	execSync("git add -A", { cwd: parentDir, stdio: "inherit" });
+	
+	// Create initial commit
+	execSync('git commit -m "Initial commit"', { cwd: parentDir, stdio: "inherit" });
+	
+	console.log("Git repository initialized with initial commit");
 }
