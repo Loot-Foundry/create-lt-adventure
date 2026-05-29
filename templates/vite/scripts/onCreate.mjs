@@ -65,13 +65,19 @@ const gitDir = `${parentDir}/.git`;
 
 if (!existsSync(gitDir)) {
 	console.log("Initializing git repository...");
-	execSync("git init", { cwd: parentDir, stdio: "inherit" });
-	
+	execSync("git init", { cwd: parentDir, stdio: "ignore" });
+
 	// Stage all files including dot-prefixed ones
-	execSync("git add -A", { cwd: parentDir, stdio: "inherit" });
-	
+	execSync("git add -A", { cwd: parentDir, stdio: "ignore" });
+
 	// Create initial commit
-	execSync('git commit -m "Initial commit"', { cwd: parentDir, stdio: "inherit" });
-	
+	execSync('git commit -m "Initial commit"', { cwd: parentDir, stdio: "ignore" });
+
 	console.log("Git repository initialized with initial commit");
+	console.log("");
+	console.log("To link this to an **existing** GitHub repository, run:");
+	console.log(`  git remote add origin https://github.com/Loot-Foundry/${mod.id}.git`);
+	console.log(`  git branch -M main`);
+	console.log(`  git push -u origin main`);
+	console.log("");
 }
