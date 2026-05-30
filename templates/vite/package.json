@@ -15,7 +15,7 @@
 		"@foundryvtt/foundryvtt-cli": "^3.0.2",
 		"@types/jquery": "^3.5.33",
 		"dotenv": "^17.2.3",
-		"foundryvtt-sync": "^2.5.0",
+		"foundryvtt-sync": "^3",
 		"kolorist": "^1.8.0",
 		"postcss-preset-env": "^10.6.0",
 		"postcss-replace": "^2.0.1",
