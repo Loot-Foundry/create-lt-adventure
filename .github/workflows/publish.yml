@@ -46,4 +46,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         if: ${{ env.DISCORD_WEBHOOK != '' && !github.event.release.prerelease }}
         with:
-          args: "${{steps.title.outputs.title}} has been updated to version `${{github.event.release.tag_name}}`!"
+          args: "`create-lt-adventure` has been updated to version `${{github.event.release.tag_name}}`! Update using `bun update create-lt-adventure -g --latest --no-cache`"

@@ -21,7 +21,7 @@ create-lt-adventure
 Update the package using
 
 ```bash
-bun update create-lt-adventure -g --latest
+bun update create-lt-adventure -g --latest --no-cache
 ```
 
 ### Development Installation
