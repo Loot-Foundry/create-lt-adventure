@@ -39,3 +39,11 @@ jobs:
 
       - name: Publish Package
         run: npm publish --provenance
+
+      - name: Send Discord Ping
+        uses: Ilshidur/action-discord@0.3.2
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        if: ${{ env.DISCORD_WEBHOOK != '' && !github.event.release.prerelease }}
+        with:
+          args: "${{steps.title.outputs.title}} has been updated to version `${{github.event.release.tag_name}}`!"
