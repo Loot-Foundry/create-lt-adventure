@@ -44,6 +44,7 @@ jobs:
         uses: Ilshidur/action-discord@0.3.2
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        if: ${{ env.DISCORD_WEBHOOK != '' && !github.event.release.prerelease }}
+        if: ${{ env.DISCORD_WEBHOOK != '' }}
         with:
-          args: "`create-lt-adventure` has been updated to version `${{github.event.release.tag_name}}`! Update using `bun update create-lt-adventure -g --latest --no-cache`"
+          args: >-
+            `create-lt-adventure` has been updated to version `${{ github.ref_name }}`! Update using `bun update create-lt-adventure -g --latest --no-cache`
