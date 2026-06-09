@@ -436,7 +436,7 @@ if (migrateFromFlag) {
 	const spin = p.spinner();
 	spin.start(`Migrating packs from ${cyan(migrateFromFlag)}...`);
 	try {
-		await migrateFrom(migrateFromFlag, modulePath);
+		await migrateFrom(migrateFromFlag, modulePath, spin);
 		spin.stop("Migration completed successfully");
 	} catch (err) {
 		spin.stop(`Migration failed: ${err instanceof Error ? err.message : String(err)}`);
