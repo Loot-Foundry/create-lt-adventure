@@ -34,6 +34,9 @@ export function isUrl(input: string): boolean {
 async function readModuleJson(source: string, p: SpinnerResult): Promise<ModuleJson> {
 	if (isUrl(source)) {
 		p.message(`Fetching module.json from ${cyan(source)}...`);
+		if (source.endsWith(".zip")) {
+			source = source.replace(".zip", ".json");
+		}
 		const response = await fetch(source);
 		if (!response.ok) {
 			throw new Error(`Failed to fetch module.json: ${response.status} ${response.statusText}`);
@@ -219,7 +222,7 @@ export async function migrateFrom(source: string, modulePath: string, p: Spinner
 			}
 		}
 
-p.message(`Migration complete! ${newPacks.length} pack(s) processed. Extracted module kept in ${cyan(tempDir)}.`);
+		p.message(`Migration complete! ${newPacks.length} pack(s) processed. Extracted module kept in ${cyan(tempDir)}.`);
 	} catch (error) {
 		p.message(`Migration failed: ${error instanceof Error ? error.message : String(error)}`);
 		throw error;
