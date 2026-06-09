@@ -1,6 +1,6 @@
 import { mkdir, readdir, readFile, writeFile, stat, copyFile, cp } from "fs/promises";
 import { existsSync, readdirSync, statSync } from "fs";
-import { join, dirname, relative } from "path";
+import { join } from "path";
 import AdmZip from "adm-zip";
 import { extractPack } from "@foundryvtt/foundryvtt-cli";
 import { yellow, cyan } from "kolorist";
@@ -102,41 +102,6 @@ async function isLevelDBFolder(folderPath: string): Promise<boolean> {
 	return entries.some((e) => levelDBMarkers.some((m) => e === m || e.endsWith(".ldb") || e.endsWith(".log")));
 }
 
-async function findFiles(dir: string, baseDir: string, extensions: string[]): Promise<string[]> {
-	const results: string[] = [];
-	const entries = await readdir(dir, { withFileTypes: true });
-
-	for (const entry of entries) {
-		const fullPath = join(dir, entry.name);
-		if (entry.isDirectory()) {
-			results.push(...await findFiles(fullPath, baseDir, extensions));
-		} else if (extensions.some((ext) => entry.name.endsWith(ext))) {
-			results.push(fullPath);
-		}
-	}
-
-	return results;
-}
-
-async function copyAssetsToMigration(moduleRoot: string): Promise<number> {
-	const migrationDir = join("src", "migration");
-	await mkdir(migrationDir, { recursive: true });
-
-	const cssJsFiles = await findFiles(moduleRoot, moduleRoot, [".css", ".js"]);
-	let copiedCount = 0;
-
-	for (const filePath of cssJsFiles) {
-		const relativePath = relative(moduleRoot, filePath);
-		const destPath = join(migrationDir, relativePath.replace(/^[\\/]/, ""));
-		const destDir = dirname(destPath);
-
-		await mkdir(destDir, { recursive: true });
-		await copyFile(filePath, destPath);
-		copiedCount++;
-	}
-
-	return copiedCount;
-}
 
 export async function migrateFrom(source: string, modulePath: string, p: SpinnerResult): Promise<void> {
 	const sourceModuleJson = await readModuleJson(source, p);
@@ -150,7 +115,11 @@ export async function migrateFrom(source: string, modulePath: string, p: Spinner
 		return;
 	}
 
-	p.message(`Downloading module from ${cyan(sourceModuleJson.download)}`);
+	const maxWidth = Math.max(20, (process.stdout.columns || 80) - 20);
+	const downloadUrl = sourceModuleJson.download.length > maxWidth
+		? sourceModuleJson.download.slice(0, maxWidth - 3) + "..."
+		: sourceModuleJson.download;
+	p.message(`Downloading module from ${cyan(downloadUrl)}`);
 
 	const tempDir = join(modulePath, "temp", `${sourceModuleJson.id || `module-${Date.now()}`}`);
 
@@ -250,11 +219,7 @@ export async function migrateFrom(source: string, modulePath: string, p: Spinner
 			}
 		}
 
-		p.message("Extracting CSS and JS assets...");
-		const assetCount = await copyAssetsToMigration(moduleRoot);
-		p.message(`Copied ${assetCount} asset(s) to src/migration/`);
-
-		p.message(`Migration complete! ${newPacks.length} pack(s) processed. Extracted module kept in ${cyan(tempDir)}.`);
+p.message(`Migration complete! ${newPacks.length} pack(s) processed. Extracted module kept in ${cyan(tempDir)}.`);
 	} catch (error) {
 		p.message(`Migration failed: ${error instanceof Error ? error.message : String(error)}`);
 		throw error;
