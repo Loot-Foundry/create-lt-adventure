@@ -41,10 +41,10 @@ jobs:
         run: npm publish --provenance
 
       - name: Send Discord Ping
-        uses: Ilshidur/action-discord@0.3.2
+        if: ${{ env.DISCORD_WEBHOOK != '' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        if: ${{ env.DISCORD_WEBHOOK != '' }}
-        with:
-          args: >-
-            `create-lt-adventure` has been updated to version `${{ github.ref_name }}`! Update using `bun update create-lt-adventure -g --latest --no-cache`
+        run: |
+          curl -s -X POST "$DISCORD_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\": \"\`create-lt-adventure\` has been updated to version \`${{ github.ref_name }}\`! Update using \`bun update create-lt-adventure -g --latest --no-cache\`\"}"
