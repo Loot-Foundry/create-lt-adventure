@@ -33,6 +33,9 @@ export function isUrl(input: string): boolean {
 
 async function readModuleJson(source: string, p: SpinnerResult): Promise<ModuleJson> {
 	if (isUrl(source)) {
+		if (source.endsWith(".zip")) {
+			source = source.replace(".zip", ".json");
+		}
 		p.message(`Fetching module.json from ${cyan(source)}...`);
 		const response = await fetch(source);
 		if (!response.ok) {
