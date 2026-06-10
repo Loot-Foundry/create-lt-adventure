@@ -1,6 +1,6 @@
 import { mkdir, readdir, readFile, writeFile, stat, copyFile, cp } from "fs/promises";
 import { existsSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+import { join, dirname, relative } from "path";
 import AdmZip from "adm-zip";
 import { extractPack } from "@foundryvtt/foundryvtt-cli";
 import { yellow, cyan } from "kolorist";
@@ -34,9 +34,6 @@ export function isUrl(input: string): boolean {
 async function readModuleJson(source: string, p: SpinnerResult): Promise<ModuleJson> {
 	if (isUrl(source)) {
 		p.message(`Fetching module.json from ${cyan(source)}...`);
-		if (source.endsWith(".zip")) {
-			source = source.replace(".zip", ".json");
-		}
 		const response = await fetch(source);
 		if (!response.ok) {
 			throw new Error(`Failed to fetch module.json: ${response.status} ${response.statusText}`);
@@ -105,34 +102,75 @@ async function isLevelDBFolder(folderPath: string): Promise<boolean> {
 	return entries.some((e) => levelDBMarkers.some((m) => e === m || e.endsWith(".ldb") || e.endsWith(".log")));
 }
 
+async function findFiles(dir: string, baseDir: string, extensions: string[]): Promise<string[]> {
+	const results: string[] = [];
+	const entries = await readdir(dir, { withFileTypes: true });
+
+	for (const entry of entries) {
+		const fullPath = join(dir, entry.name);
+		if (entry.isDirectory()) {
+			results.push(...await findFiles(fullPath, baseDir, extensions));
+		} else if (extensions.some((ext) => entry.name.endsWith(ext))) {
+			results.push(fullPath);
+		}
+	}
+
+	return results;
+}
+
+async function copyAssetsToMigration(moduleRoot: string): Promise<number> {
+	const migrationDir = join("src", "migration");
+	await mkdir(migrationDir, { recursive: true });
+
+	const cssJsFiles = await findFiles(moduleRoot, moduleRoot, [".css", ".js"]);
+	let copiedCount = 0;
+
+	for (const filePath of cssJsFiles) {
+		const relativePath = relative(moduleRoot, filePath);
+		const destPath = join(migrationDir, relativePath.replace(/^[\\/]/, ""));
+		const destDir = dirname(destPath);
+
+		await mkdir(destDir, { recursive: true });
+		await copyFile(filePath, destPath);
+		copiedCount++;
+	}
+
+	return copiedCount;
+}
 
 export async function migrateFrom(source: string, modulePath: string, p: SpinnerResult): Promise<void> {
 	const sourceModuleJson = await readModuleJson(source, p);
-
-	if (!sourceModuleJson.download) {
-		throw new Error("No download URL found in module.json. The source module does not have a download property.");
-	}
 
 	if (!sourceModuleJson.packs || sourceModuleJson.packs.length === 0) {
 		p.message("No packs found in the source module.json.");
 		return;
 	}
 
-	const maxWidth = Math.max(20, (process.stdout.columns || 80) - 20);
-	const downloadUrl = sourceModuleJson.download.length > maxWidth
-		? sourceModuleJson.download.slice(0, maxWidth - 3) + "..."
-		: sourceModuleJson.download;
-	p.message(`Downloading module from ${cyan(downloadUrl)}`);
+	const isLocal = !isUrl(source);
 
-	const tempDir = join(modulePath, "temp", `${sourceModuleJson.id || `module-${Date.now()}`}`);
+	let tempDir: string | null = null;
+	let moduleRoot: string;
 
-	try {
+	if (isLocal) {
+		const sourceStat = await stat(source);
+		moduleRoot = sourceStat.isDirectory() ? source : dirname(source);
+		p.message(`Using local module at ${cyan(moduleRoot)}`);
+	} else {
+		if (!sourceModuleJson.download) {
+			throw new Error("No download URL found in module.json. The source module does not have a download property.");
+		}
+
+		p.message(`Downloading module from ${cyan(sourceModuleJson.download)}`);
+
+		tempDir = join(modulePath, "temp", `${sourceModuleJson.id || `module-${Date.now()}`}`);
 		await mkdir(tempDir, { recursive: true });
 		const zipBuffer = await downloadZipBuffer(sourceModuleJson.download);
 		const zip = new AdmZip(zipBuffer);
 		zip.extractAllTo(tempDir, true);
+		moduleRoot = findModuleRoot(tempDir);
+	}
 
-		const moduleRoot = findModuleRoot(tempDir);
+	try {
 		p.message(`Found ${sourceModuleJson.packs.length} pack(s) in module.json: ${sourceModuleJson.packs.map((p) => p.name).join(", ")}`);
 
 		const targetPacksDir = join(modulePath, "packs");
@@ -222,7 +260,11 @@ export async function migrateFrom(source: string, modulePath: string, p: Spinner
 			}
 		}
 
-		p.message(`Migration complete! ${newPacks.length} pack(s) processed. Extracted module kept in ${cyan(tempDir)}.`);
+		p.message("Extracting CSS and JS assets...");
+		const assetCount = await copyAssetsToMigration(moduleRoot);
+		p.message(`Copied ${assetCount} asset(s) to src/migration/`);
+
+		p.message(`Migration complete! ${newPacks.length} pack(s) processed.${tempDir ? ` Extracted module kept in ${cyan(tempDir)}.` : ""}`);
 	} catch (error) {
 		p.message(`Migration failed: ${error instanceof Error ? error.message : String(error)}`);
 		throw error;
