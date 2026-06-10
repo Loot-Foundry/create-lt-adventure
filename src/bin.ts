@@ -96,6 +96,7 @@ p.log.step(`Creating a new Foundry VTT module...`);
 const packageDir = (d: string) => resolve(__dirname, d);
 
 let deleteFolder = false;
+let customFolderName: string | null = null;
 const templates = readdirSync(packageDir("../templates"));
 const addonDirs = readdirSync(packageDir("../addons")).filter((item) => {
 	const stat = statSync(packageDir(`../addons/${item}`));
@@ -176,15 +177,35 @@ const data = await p.group(
 					deleteFolder = true;
 					return;
 				}
-				const confirm = await p.confirm({
-					message: `Folder already exists at ${fullPath}. Overwrite?`,
-					initialValue: false,
+				const action = await p.select({
+					message: `Folder already exists at ${fullPath}. What would you like to do?`,
+					options: [
+						{ label: "Overwrite", value: "overwrite", hint: "Delete the existing folder and replace it" },
+						{ label: "Rename", value: "rename", hint: "Keep the existing folder under a new name." },
+						{ label: "Cancel", value: "cancel" },
+					],
 				});
-				if (p.isCancel(confirm) || !confirm) {
+				if (p.isCancel(action) || action === "cancel") {
 					p.cancel("Cancelled due to already existing folder.");
 					process.exit(1);
-				} else {
+				} else if (action === "overwrite") {
 					deleteFolder = true;
+				} else if (action === "rename") {
+					const newName = await p.text({
+						message: "Create new module in folder named?",
+						initialValue: `${id}-new`,
+						defaultValue: `${id}-new`,
+						validate: (value) => {
+							if (!value) return "Name is required";
+							const dest = resolve(process.cwd(), value);
+							if (existsSync(dest)) return `A folder already exists at ${dest}`;
+						},
+					});
+					if (p.isCancel(newName)) {
+						p.cancel("Cancelled.");
+						process.exit(1);
+					}
+					customFolderName = newName;
 				}
 			}
 		},
@@ -241,8 +262,8 @@ const data = await p.group(
 	{ onCancel: () => process.exit(1) },
 ) as Results;
 
-// Resolve module path relative to cwd
-const modulePath = resolve(process.cwd(), data.id);
+// Resolve module path relative to cwd — use custom folder name if the user chose one instead of overwriting
+const modulePath = resolve(process.cwd(), customFolderName ?? data.id);
 
 function hasPackageJSON(): boolean {
 	return existsSync(join(modulePath, "package.json"));
@@ -518,4 +539,11 @@ if (existsSync(onCreatePath)) {
 	}
 }
 
-p.outro(`cd ${cyan(data.id)} ${hasPackageJSON() ? "&& bun install" : "and get to making stuff!"}`);
+if (customFolderName !== null) {
+	p.note(
+		`Module was created in "${cyan(customFolderName)}" instead of "${data.id}".\nRemember to rename the folder to match the module ID before loading it in Foundry.`,
+		"Note: folder name differs from module ID"
+	);
+}
+
+p.outro(`cd ${cyan(customFolderName ?? data.id)} ${hasPackageJSON() ? "&& bun install" : "and get to making stuff!"}`);
